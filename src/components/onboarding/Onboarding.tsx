@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { WelcomeStep } from "./welcome-step";
 import { RoleSelectionStep } from "./role-selection-step";
-
-export type UserRole = 'host' | 'vendor' | null
+import type { UserRole } from "@/App";
+import { BenefitsStep } from "./benefits-page";
 
 export function OnboardingPage() {
     //  const ONBOARDING_STEPS = ["WELCOME", 'ROLE-SELECT', 'BENEFITS', 'CREATE-ACCOUNT', 'CONFIRM']
@@ -22,6 +22,7 @@ export function OnboardingPage() {
         <div className="min-h-screen bg-background">
             {currentStep == 0 && <WelcomeStep onNext={handleNext}></WelcomeStep>}
             {currentStep == 1 && <RoleSelectionStep selectedRole={selectedRole} onRoleSelect={handleRoleSelect} onNext={handleNext}></RoleSelectionStep>}
+            {currentStep == 2 && <BenefitsStep selectedRole={selectedRole} onNext={handleNext}></BenefitsStep>}
             
         </div>
     )

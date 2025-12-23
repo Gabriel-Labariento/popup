@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Calendar, ShoppingBag, Check } from "lucide-react"
-import type { UserRole } from "./Onboarding"
+import type { UserRole } from "@/App"
 
 interface RoleSelectionStepProps {
   selectedRole: UserRole
