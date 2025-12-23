@@ -21,7 +21,8 @@ export function OnboardingPage() {
     return (
         <div className="min-h-screen bg-background">
             {currentStep == 0 && <WelcomeStep onNext={handleNext}></WelcomeStep>}
-            {/* {currentStep == 1 && <RoleSelectionStep></RoleSelectionStep>} */}
+            {currentStep == 1 && <RoleSelectionStep selectedRole={selectedRole} onRoleSelect={handleRoleSelect} onNext={handleNext}></RoleSelectionStep>}
+            
         </div>
     )
 }
