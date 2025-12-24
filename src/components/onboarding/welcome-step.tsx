@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
+import { Link } from "react-router-dom"
 
 interface WelcomeStepProps {
   onNext: () => void
@@ -39,6 +40,17 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
             Learn How It Works
           </Button>
         </div>
+
+        {/* Login */}
+        <p className="mt-4 text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link
+              to="/login"
+              className="font-semibold text-primary hover:underline underline-offset-4"
+            >
+              Log in
+            </Link>
+        </p>
       </div>
     </div>
   )
