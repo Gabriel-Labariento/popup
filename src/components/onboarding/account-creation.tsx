@@ -6,6 +6,7 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { Eye, EyeOff, Check, X } from "lucide-react"
 import type { UserRole } from "@/App"
+import { UserAuth } from "@/context/AuthContext"
 
 interface AccountCreationStepProps {
   selectedRole: UserRole
@@ -18,7 +19,12 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
   const [confirmPassword, setConfirmPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState("")
 
+  const {session, signUpNewUser} = UserAuth()
+  console.log(session)
+  
   const passwordRequirements = {
     minLength: password.length >= 8,
     hasNumber: /\d/.test(password),
