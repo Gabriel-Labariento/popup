@@ -7,6 +7,7 @@ import { Label } from "../ui/label"
 import { Eye, EyeOff, Check, X } from "lucide-react"
 import type { UserRole } from "@/App"
 import { UserAuth } from "@/context/AuthContext"
+import { useNavigate } from "react-router-dom"
 
 interface AccountCreationStepProps {
   selectedRole: UserRole
@@ -20,7 +21,9 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState("")
-  const [loading, setLoading] = useState("")
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  console.log("here")
 
   const {session, signUpNewUser} = UserAuth()
   console.log(session)
@@ -28,7 +31,8 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
   const passwordRequirements = {
     minLength: password.length >= 8,
     hasNumber: /\d/.test(password),
-    hasLetter: /[a-zA-Z]/.test(password),
+    hasUpper: /[A-Z]/.test(password),
+    hasLower: /[a-z]/.test(password)
   }
 
   const allRequirementsMet = Object.values(passwordRequirements).every((req) => req)
@@ -36,10 +40,28 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
 
   const isFormValid = email && allRequirementsMet && passwordsMatch && password && confirmPassword
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (isFormValid) {
-      onNext()
+    if (!isFormValid) {
+      setError("Form requirements not met")
+      return
+    }
+
+    setLoading(true)
+    setError("")
+    try {
+      const result = await signUpNewUser({email, password})
+      if (result?.success) {
+        if (selectedRole == 'host') navigate('/host/dashboard')
+        else if (selectedRole == 'vendor') navigate('/vendor/dashboard')
+        onNext()
+      } else {
+        setError(result?.error?.message || "Failed to create account")
+      }
+    } catch (error) {
+      setError("An error occurred during account creation")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -95,7 +117,8 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
               <div className="space-y-1.5 rounded-lg bg-muted/50 p-3 text-sm">
                 <PasswordRequirement met={passwordRequirements.minLength} text="At least 8 characters" />
                 <PasswordRequirement met={passwordRequirements.hasNumber} text="Contains a number" />
-                <PasswordRequirement met={passwordRequirements.hasLetter} text="Contains a letter" />
+                <PasswordRequirement met={passwordRequirements.hasLower} text="Contains a lowercase letter" />
+                <PasswordRequirement met={passwordRequirements.hasUpper} text="Contains an uppercase letter" />
               </div>
             )}
           </div>
