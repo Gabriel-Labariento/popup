@@ -7,7 +7,7 @@ interface ConfirmationStepProps {
 }
 
 export function Dashboard({ selectedRole }: ConfirmationStepProps) {
-  const isHost = selectedRole === "host"
+  const isHost = selectedRole === "HOST"
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">

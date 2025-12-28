@@ -10,7 +10,7 @@ interface BenefitsStepProps {
 }
 
 export function BenefitsStep({ selectedRole, onNext }: BenefitsStepProps) {
-  const isHost = selectedRole === "host"
+  const isHost = selectedRole === "HOST"
 
   const benefits = isHost
     ? [

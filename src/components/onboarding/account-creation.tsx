@@ -50,10 +50,10 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
     setLoading(true)
     setError("")
     try {
-      const result = await signUpNewUser({email, password})
+      const result = await signUpNewUser({email, password}, selectedRole)
       if (result?.success) {
-        if (selectedRole == 'host') navigate('/host/dashboard')
-        else if (selectedRole == 'vendor') navigate('/vendor/dashboard')
+        if (selectedRole == 'HOST') navigate('/host/dashboard')
+        else if (selectedRole == 'VENDOR') navigate('/vendor/dashboard')
         onNext()
       } else {
         setError(result?.error?.message || "Failed to create account")
@@ -72,7 +72,7 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
         <div className="mb-8 text-center">
           <h2 className="mb-3 text-3xl font-bold text-foreground">Create Your Account</h2>
           <p className="text-balance text-muted-foreground">
-            {selectedRole === "host" ? "Start connecting with pop-up vendors" : "Start discovering events near you"}
+            {selectedRole === "HOST" ? "Start connecting with pop-up vendors" : "Start discovering events near you"}
           </p>
         </div>
 

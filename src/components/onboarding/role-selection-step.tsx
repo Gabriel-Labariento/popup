@@ -34,11 +34,11 @@ export function RoleSelectionStep({ selectedRole, onRoleSelect, onNext }: RoleSe
           {/* Event Host Card */}
           <Card
             className={`relative cursor-pointer border-2 p-8 transition-all hover:shadow-lg ${
-              selectedRole === "host" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+              selectedRole === "HOST" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
             }`}
-            onClick={() => onRoleSelect("host")}
+            onClick={() => onRoleSelect("HOST")}
           >
-            {selectedRole === "host" && (
+            {selectedRole === "HOST" && (
               <div className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-primary">
                 <Check className="h-5 w-5 text-primary-foreground" />
               </div>
@@ -67,11 +67,11 @@ export function RoleSelectionStep({ selectedRole, onRoleSelect, onNext }: RoleSe
           {/* Pop-Up Vendor Card */}
           <Card
             className={`relative cursor-pointer border-2 p-8 transition-all hover:shadow-lg ${
-              selectedRole === "vendor" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+              selectedRole === "VENDOR" ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
             }`}
-            onClick={() => onRoleSelect("vendor")}
+            onClick={() => onRoleSelect("VENDOR")}
           >
-            {selectedRole === "vendor" && (
+            {selectedRole === "VENDOR" && (
               <div className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-primary">
                 <Check className="h-5 w-5 text-primary-foreground" />
               </div>
