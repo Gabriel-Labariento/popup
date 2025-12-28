@@ -22,7 +22,6 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
 
     // Sign up 
     const signUpNewUser = async ({email, password}: UserCredentials, selectedRole: UserRole) => {
-
         const {data, error} = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -32,8 +31,6 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
                 }
             }
         })
-        
-
         if (error) {
             console.error("Error signing up: ", error)
             return {success: false, error}
@@ -53,7 +50,7 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
                 return {success: false, error}
             }
             console.log("sign-in success: ", data)
-            return {success: true, data}
+            return {success: true, data: data}
         } catch (error) {
             console.error("Error signing in: ", error)
             return {success: false, error}
