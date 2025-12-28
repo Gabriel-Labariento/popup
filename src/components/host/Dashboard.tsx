@@ -1,12 +1,24 @@
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Calendar} from "lucide-react"
-import { UserRole } from "@/App"
-
-interface ConfirmationStepProps {
-  selectedRole: UserRole
-}
+import { UserAuth } from "@/context/AuthContext"
+import { useNavigate } from "react-router-dom";
 
 export function HostDashboard() {
+  const {session, signOut} = UserAuth();
+  const navigate = useNavigate()
+  console.log("Current session: ", session)
+
+  const handleSignOut = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await signOut()
+      navigate("/login")
+    } catch (error) {
+      console.error("Error signing out: ", error)
+    }
+  }
+
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-2xl text-center">
@@ -38,8 +50,13 @@ export function HostDashboard() {
         </div>
 
         {/* Secondary Action */}
-        <Button variant="outline" size="lg">
+        <Button variant="outline" size="lg" className="w-7/12 mb-3">
           Complete Your Profile
+        </Button>
+
+        {/* Tertiary Action */}
+        <Button variant="ghost" size="sm" className="w-6/12" onClick={handleSignOut}>
+          Sign Out
         </Button>
       </div>
     </div>
