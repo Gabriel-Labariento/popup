@@ -43,7 +43,7 @@ export function HostDashboard() {
           </p>
 
           {/* CTA Button */}
-          <Button size="lg" className="w-full">
+          <Button size="lg" className="w-full hover:cursor-pointer">
                 <Calendar className="mr-2 h-5 w-5" />
                 Post Your First Event
           </Button>
