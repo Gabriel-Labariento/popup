@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState, useContext, ReactNode } from "react";
 import { supabase } from "@/lib/supabase/client/supabase";
 import { Session } from "@supabase/supabase-js";
-import { UserRole } from "@/App";
+import { UserRole } from "@/types";
 
 export type UserCredentials = {
     email: string,
@@ -19,9 +19,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthContextProvider = ({children}: {children: ReactNode}) => {
     const [session, setSession] = useState<Session | null>(null)
+    const [loading, setLoading] = useState(false)
 
     // Sign up 
     const signUpNewUser = async ({email, password}: UserCredentials, selectedRole: UserRole) => {
+        setLoading(true)
         const {data, error} = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -33,13 +35,16 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
         })
         if (error) {
             console.error("Error signing up: ", error)
+            setLoading(false)
             return {success: false, error}
         }
+        setLoading(true)
         return {success: true, data}
     }
     
     // Sign in
     const signInUser = async ({email , password}: UserCredentials) => {
+        setLoading(true)
         try {
             const {data, error} = await supabase.auth.signInWithPassword({
                 email: email,
@@ -54,6 +59,8 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
         } catch (error) {
             console.error("Error signing in: ", error)
             return {success: false, error}
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -70,10 +77,12 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
 
     // Sign out
     const signOut = async () => {
+        setLoading(true)
         const {error} = await supabase.auth.signOut();
         if (error) {
             console.error("Sign out error: ", error)
-        }
+            setLoading(false)
+        } setLoading(false)
     }
     return (
         <AuthContext.Provider value={{session, signUpNewUser, signInUser, signOut }}>
