@@ -4,6 +4,7 @@ import { LoginPage } from "./components/login-page";
 import { HostDashboard } from "./components/host/Dashboard";
 import { VendorDashboard } from "./components/vendor/Dashboard";
 import Layout from "./components/Layout";
+import PrivateRoute from "./components/PrivateRoute";
 
 export const router = createBrowserRouter([
   { path: '/', element: <OnboardingPage></OnboardingPage>},
@@ -11,8 +12,8 @@ export const router = createBrowserRouter([
   {
     element: <Layout></Layout>,
     children: [
-        { path: '/host/dashboard', element: <HostDashboard></HostDashboard>},
-        { path: '/vendor/dashboard', element: <VendorDashboard></VendorDashboard>}
+        { path: '/host/dashboard', element: <PrivateRoute><HostDashboard></HostDashboard></PrivateRoute>},
+        { path: '/vendor/dashboard', element: <PrivateRoute><VendorDashboard></VendorDashboard></PrivateRoute>}
     ]
   }]
 )

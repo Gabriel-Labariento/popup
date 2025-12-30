@@ -49,14 +49,6 @@ export function LoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center px-4 bg-background">
       <div className="w-full max-w-md">
-        {/* Back Button */}
-        <Link 
-          to="/" 
-          className="mb-8 flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to home
-        </Link>
 
         {/* Logo and Header */}
         <div className="mb-8">

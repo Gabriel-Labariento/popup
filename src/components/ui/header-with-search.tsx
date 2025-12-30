@@ -4,9 +4,23 @@ import { Sheet, SheetContent, SheetFooter } from '@/components/ui/sheet';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CommandItem, SearchModal } from '@/components/ui/search-modal';
+import { useNavigate } from 'react-router-dom';
+import { UserAuth } from '@/context/AuthContext';
 
 export function Header() {
 	const [open, setOpen] = React.useState(false);
+	const navigate = useNavigate();
+	const {signOut} = UserAuth()
+
+	const handleSignOut = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      await signOut()
+      navigate("/login")
+    } catch (error) {
+      console.error("Error signing out: ", error)
+    }
+  }
 
 	const links = [
 		{
@@ -86,8 +100,9 @@ export function Header() {
 								))}
 							</div>
 							<SheetFooter>
-								<Button variant="outline">Sign In</Button>
-								<Button>Get Started</Button>
+								<Button variant="ghost" size="sm" className="w-6/12" onClick={handleSignOut}>
+          							Sign Out
+        						</Button>
 							</SheetFooter>
 						</SheetContent>
 					</Sheet>

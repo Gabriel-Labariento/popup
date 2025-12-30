@@ -18,7 +18,6 @@ export function HostDashboard() {
     }
   }
 
-
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-2xl text-center">
@@ -52,11 +51,6 @@ export function HostDashboard() {
         {/* Secondary Action */}
         <Button variant="outline" size="lg" className="w-7/12 mb-3">
           Complete Your Profile
-        </Button>
-
-        {/* Tertiary Action */}
-        <Button variant="ghost" size="sm" className="w-6/12" onClick={handleSignOut}>
-          Sign Out
         </Button>
       </div>
     </div>
