@@ -25,15 +25,15 @@ export function Header() {
 	const links = [
 		{
 			label: 'TODO: Prop',
-			href: '#',
+			href: 'profile',
 		},
 		{
 			label: 'TODO: Prop',
-			href: '#',
+			href: 'events',
 		},
 		{
 			label: 'TODO: Prop',
-			href: '#',
+			href: 'applications',
 		},
 	];
 
@@ -54,7 +54,7 @@ export function Header() {
 						{links.map((link) => (
 							<a
 								className={buttonVariants({ variant: 'ghost' })}
-								href={link.href}
+								href={link.href} key={link.href}
 							>
 								{link.label}
 							</a>
@@ -93,7 +93,7 @@ export function Header() {
 											variant: 'ghost',
 											className: 'justify-start',
 										})}
-										href={link.href}
+										href={link.href} key={link.href}
 									>
 										{link.label}
 									</a>

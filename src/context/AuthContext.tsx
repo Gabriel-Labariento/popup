@@ -10,6 +10,7 @@ export type UserCredentials = {
 
 type AuthContextType = {
     session: Session | null,
+    loading: boolean,
     signUpNewUser: (credentials: UserCredentials, selectedRole: UserRole) => Promise<{success: boolean, error?: any, data?: any}>,
     signInUser: (credentials: UserCredentials) => Promise<{success: boolean, error?: any, data?: any}>,
     signOut: () => Promise<void>
@@ -19,11 +20,26 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export const AuthContextProvider = ({children}: {children: ReactNode}) => {
     const [session, setSession] = useState<Session | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
+
+
+    useEffect(() => {
+        supabase.auth.getSession()
+        .then(({data: {session}}) => {
+            setSession(session)
+            setLoading(false)
+        })
+        
+        supabase.auth.onAuthStateChange((_event, session) => {
+            console.log("Auth state change")
+            console.log("session: ", session)
+            setSession(session)
+            setLoading(false)
+        })
+    }, [])
 
     // Sign up 
     const signUpNewUser = async ({email, password}: UserCredentials, selectedRole: UserRole) => {
-        setLoading(true)
         const {data, error} = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -35,16 +51,13 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
         })
         if (error) {
             console.error("Error signing up: ", error)
-            setLoading(false)
             return {success: false, error}
         }
-        setLoading(true)
         return {success: true, data}
     }
     
     // Sign in
     const signInUser = async ({email , password}: UserCredentials) => {
-        setLoading(true)
         try {
             const {data, error} = await supabase.auth.signInWithPassword({
                 email: email,
@@ -59,33 +72,18 @@ export const AuthContextProvider = ({children}: {children: ReactNode}) => {
         } catch (error) {
             console.error("Error signing in: ", error)
             return {success: false, error}
-        } finally {
-            setLoading(false)
-        }
+        } 
     }
-
-    useEffect(() => {
-        supabase.auth.getSession()
-        .then(({data: {session}}) => {
-            setSession(session)
-        })
-        
-        supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session)
-        })
-    }, [])
 
     // Sign out
     const signOut = async () => {
-        setLoading(true)
         const {error} = await supabase.auth.signOut();
         if (error) {
             console.error("Sign out error: ", error)
-            setLoading(false)
-        } setLoading(false)
+        }
     }
     return (
-        <AuthContext.Provider value={{session, signUpNewUser, signInUser, signOut }}>
+        <AuthContext.Provider value={{session, loading, signUpNewUser, signInUser, signOut }}>
             {children}
         </AuthContext.Provider>
     )

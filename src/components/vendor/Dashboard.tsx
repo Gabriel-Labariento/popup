@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Search } from "lucide-react"
-import { UserRole } from "@/App"
+import { UserRole } from "@/types"
 
 export function VendorDashboard() {
   return (

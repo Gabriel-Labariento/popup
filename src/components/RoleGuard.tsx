@@ -1,14 +1,15 @@
-// components/RoleGuard.tsx
 import { Navigate, Outlet } from "react-router-dom";
 import { UserAuth } from "@/context/AuthContext";
+import { Spinner } from "./ui/spinner";
 
 interface RoleGuardProps {
   allowedRole: 'HOST' | 'VENDOR';
 }
 
 export const RoleGuard = ({ allowedRole }: RoleGuardProps) => {
-  const { session } = UserAuth();
-  
+  const { session, loading } = UserAuth();
+
+  if (loading) return <Spinner></Spinner>
   if (!session) return <Navigate to="/login" replace />;
   
   const userRole = session.user.user_metadata.role;

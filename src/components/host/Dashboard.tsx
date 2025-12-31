@@ -4,19 +4,8 @@ import { UserAuth } from "@/context/AuthContext"
 import { useNavigate } from "react-router-dom";
 
 export function HostDashboard() {
-  const {session, signOut} = UserAuth();
+  const {session} = UserAuth();
   const navigate = useNavigate()
-  console.log("Current session: ", session)
-
-  const handleSignOut = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      await signOut()
-      navigate("/login")
-    } catch (error) {
-      console.error("Error signing out: ", error)
-    }
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
