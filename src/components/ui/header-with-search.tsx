@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetFooter } from '@/components/ui/sheet';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { CommandItem, SearchModal } from '@/components/ui/search-modal';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { UserAuth } from '@/context/AuthContext';
 
 export function Header() {
@@ -24,15 +24,15 @@ export function Header() {
 
 	const links = [
 		{
-			label: 'TODO: Prop',
+			label: 'Profile',
 			href: 'profile',
 		},
 		{
-			label: 'TODO: Prop',
+			label: 'Events',
 			href: 'events',
 		},
 		{
-			label: 'TODO: Prop',
+			label: 'Applications',
 			href: 'applications',
 		},
 	];
@@ -45,10 +45,10 @@ export function Header() {
 			)}
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
-				<div className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 duration-100">
+				<Link to="/dashboard" className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 duration-100">
 					<img src={'../logo.svg'} className="size-6" />
 					<p className="font-mono text-lg font-bold">Pop Up</p>
-				</div>
+				</Link>
 				<div className="flex items-center gap-2">
 					<div className="hidden items-center gap-1 lg:flex">
 						{links.map((link) => (

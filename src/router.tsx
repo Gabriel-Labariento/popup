@@ -4,10 +4,8 @@ import { LoginPage } from "./components/login-page";
 import { HostDashboard } from "./components/host/Dashboard";
 import { VendorDashboard } from "./components/vendor/Dashboard";
 import Layout from "./components/Layout";
-import PrivateRoute from "./components/PrivateRoute";
 import { RoleGuard } from "./components/RoleGuard";
 import ProfilePage from "./components/ProfilePage";
-import { UserAuth } from "./context/AuthContext";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---
@@ -48,6 +46,11 @@ export const router = createBrowserRouter([
         ]
       }
     ]
+  },
+
+  {
+    path: '/dashboard',
+    element: <RoleGuard allowedRole={undefined}></RoleGuard>
   },
   // --- CATCH ALL ---
   { path: '*', element: <Navigate to="/" replace /> }

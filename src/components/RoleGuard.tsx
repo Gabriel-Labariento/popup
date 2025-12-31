@@ -3,7 +3,7 @@ import { UserAuth } from "@/context/AuthContext";
 import { Spinner } from "./ui/spinner";
 
 interface RoleGuardProps {
-  allowedRole: 'HOST' | 'VENDOR';
+  allowedRole: 'HOST' | 'VENDOR' | undefined;
 }
 
 export const RoleGuard = ({ allowedRole }: RoleGuardProps) => {
@@ -14,7 +14,7 @@ export const RoleGuard = ({ allowedRole }: RoleGuardProps) => {
   
   const userRole = session.user.user_metadata.role;
 
-  if (userRole !== allowedRole) {
+  if (userRole !== allowedRole || allowedRole === undefined) {
     // Redirect to their own dashboard if they try to access the wrong role's area
     return <Navigate to={userRole === 'HOST' ? '/host/dashboard' : '/vendor/dashboard'} replace />;
   }

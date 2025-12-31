@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Calendar} from "lucide-react"
 import { UserAuth } from "@/context/AuthContext"
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export function HostDashboard() {
   const {session} = UserAuth();
-  const navigate = useNavigate()
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
@@ -38,9 +37,9 @@ export function HostDashboard() {
         </div>
 
         {/* Secondary Action */}
-        <Button variant="outline" size="lg" className="w-7/12 mb-3">
-          Complete Your Profile
-        </Button>
+        <Link className="w-7/12 mb-3 button-styles" to="/host/profile">
+          Go to My Profile
+        </Link>
       </div>
     </div>
   )
