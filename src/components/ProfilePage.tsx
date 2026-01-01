@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client/supabase';
 import { HostProfile, VendorProfile, UserRole } from '../types';
-import { User, Store, Building2, Globe, Phone, Save, Loader2 } from 'lucide-react';
+import { Store, Building2, Globe, Phone, Save, Loader2 } from 'lucide-react';
 
 const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [role, setRole] = useState<UserRole | null>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [avatarUrl, setAvatarUrl] = useState<any>(null)
 
   useEffect(() => {
+    let ignore = false
     fetchProfile();
   }, []);
 
@@ -63,7 +65,7 @@ const ProfilePage = () => {
 
   if (loading) return (
     <div className="flex h-screen items-center justify-center">
-      <Loader2 className="animate-spin text-indigo-600" size={48} />
+      <Loader2 className="animate-spin text-rose-700" size={48} />
     </div>
   );
 
@@ -73,7 +75,7 @@ const ProfilePage = () => {
         {/* Header */}
         <div className="bg-slate-50 p-6 border-b border-slate-200 flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600">
+            <div className="h-16 w-16 bg-rose-100 rounded-full flex items-center justify-center text-rose-600">
               {role === 'HOST' ? <Building2 size={32} /> : <Store size={32} />}
             </div>
             <div>
@@ -84,7 +86,7 @@ const ProfilePage = () => {
           <button
             onClick={handleUpdate}
             disabled={saving}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
             {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
             Save Changes
@@ -101,7 +103,7 @@ const ProfilePage = () => {
               </label>
               <input
                 type="text"
-                className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none"
                 value={role === 'HOST' ? profile.organization_name : profile.business_name}
                 onChange={(e) => setProfile({ ...profile, [role === 'HOST' ? 'organization_name' : 'business_name']: e.target.value })}
               />
@@ -115,7 +117,7 @@ const ProfilePage = () => {
                 </label>
                 <input
                   type="text"
-                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none"
                   value={profile.contact_phone || ''}
                   onChange={(e) => setProfile({ ...profile, contact_phone: e.target.value })}
                 />
@@ -131,7 +133,7 @@ const ProfilePage = () => {
                 <input
                   type="url"
                   placeholder="https://yourstore.com"
-                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none"
                   value={profile.website_url || ''}
                   onChange={(e) => setProfile({ ...profile, website_url: e.target.value })}
                 />
@@ -146,7 +148,7 @@ const ProfilePage = () => {
             </label>
             <textarea
               rows={4}
-              className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+              className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none"
               value={role === 'HOST' ? profile.bio : profile.business_description}
               onChange={(e) => setProfile({ ...profile, [role === 'HOST' ? 'bio' : 'business_description']: e.target.value })}
             />

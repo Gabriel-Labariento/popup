@@ -67,7 +67,7 @@ export function LoginPage() {
 
         {/* ERROR DISPLAY - With smooth animation */}
         {error && (
-          <div className="mb-6 flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600 animate-in fade-in slide-in-from-top-2">
+          <div className="mb-6 flex items-center gap-3 rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600 animate-in fade-in slide-in-from-top-2">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
             <p className="font-medium">{error}</p>
           </div>
@@ -81,7 +81,7 @@ export function LoginPage() {
               id="email" 
               type="email" 
               placeholder="name@example.com" 
-              className={`h-12 bg-background ${error ? 'border-red-300 focus-visible:ring-red-200' : ''}`}
+              className={`h-12 bg-background ${error ? 'border-rose-300 focus-visible:ring-rose-200' : ''}`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -99,7 +99,7 @@ export function LoginPage() {
               id="password" 
               type="password" 
               placeholder="••••••••" 
-              className={`h-12 bg-background ${error ? 'border-red-300 focus-visible:ring-red-200' : ''}`}
+              className={`h-12 bg-background ${error ? 'border-rose-300 focus-visible:ring-rose-200' : ''}`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

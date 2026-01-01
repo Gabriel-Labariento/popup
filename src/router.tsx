@@ -53,6 +53,6 @@ export const router = createBrowserRouter([
     element: <RoleGuard allowedRole={undefined}></RoleGuard>
   },
   // --- CATCH ALL ---
-  { path: '*', element: <Navigate to="/" replace /> }
+  { path: '*', element: <Navigate to="/dashboard" replace /> }
 ]);
 

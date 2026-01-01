@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { UserAuth } from "@/context/AuthContext";
-import { Spinner } from "./ui/spinner";
+import { Loader2 } from "lucide-react";
 
 interface RoleGuardProps {
   allowedRole: 'HOST' | 'VENDOR' | undefined;
@@ -9,7 +9,13 @@ interface RoleGuardProps {
 export const RoleGuard = ({ allowedRole }: RoleGuardProps) => {
   const { session, loading } = UserAuth();
 
-  if (loading) return <Spinner></Spinner>
+  if (loading) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <Loader2 className="animate-spin text-rose-600" size={48} />
+        </div>
+    )
+  }
   if (!session) return <Navigate to="/login" replace />;
   
   const userRole = session.user.user_metadata.role;
