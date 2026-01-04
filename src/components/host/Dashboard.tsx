@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Calendar} from "lucide-react"
 import { UserAuth } from "@/context/AuthContext"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { FormEvent } from "react";
 
 export function HostDashboard() {
   const {session} = UserAuth();
@@ -30,10 +31,10 @@ export function HostDashboard() {
           </p>
 
           {/* CTA Button */}
-          <Button size="lg" className="w-full hover:cursor-pointer">
+          <Link to="/host/create-event" className="inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8 text-base w-full hover:cursor-pointer" >
                 <Calendar className="mr-2 h-5 w-5" />
                 Post Your First Event
-          </Button>
+          </Link>
         </div>
 
         {/* Secondary Action */}

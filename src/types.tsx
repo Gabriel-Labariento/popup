@@ -17,3 +17,26 @@ export interface VendorProfile {
     twitter?: string;
   };
 }
+
+// FOR HOSTS
+export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED' | 'COMPLETED';
+
+export interface PopUpEvent {
+  id?: string;
+  host_id: string;
+  title: string;
+  description: string;
+  category: string;
+  start_date: string;
+  end_date: string;
+  location_address: string;
+  booth_price: number;
+  price_negotiable: boolean;
+  spots_available: number;
+  spots_filled: number;
+  application_deadline: string;
+  booth_specifications: string;
+  amenities: string[];
+  images: string[];
+  status: EventStatus;
+}

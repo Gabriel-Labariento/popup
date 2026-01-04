@@ -6,6 +6,7 @@ import { VendorDashboard } from "./components/vendor/Dashboard";
 import Layout from "./components/Layout";
 import { RoleGuard } from "./components/RoleGuard";
 import ProfilePage from "./components/ProfilePage";
+import CreateEventPage from "./components/host/CreateEventPage";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---
@@ -23,8 +24,8 @@ export const router = createBrowserRouter([
         element: <Layout />, // TODO: Specialized layout with Host Sidebar
         children: [
           { path: 'dashboard', element: <HostDashboard /> },
-          { path: 'profile', element: <ProfilePage /> }, // Works for host/profile
-          // { path: 'events/create', element: <CreateEvent /> },
+          { path: 'profile', element: <ProfilePage /> }, 
+          { path: 'create-event', element: <CreateEventPage />}
         ]
       }
     ]
