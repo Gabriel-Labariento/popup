@@ -28,10 +28,6 @@ export function Header() {
 			href: 'profile',
 		},
 		{
-			label: 'Events',
-			href: 'events',
-		},
-		{
 			label: 'Applications',
 			href: 'applications',
 		},

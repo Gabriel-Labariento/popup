@@ -7,6 +7,8 @@ import Layout from "./components/Layout";
 import { RoleGuard } from "./components/RoleGuard";
 import ProfilePage from "./components/ProfilePage";
 import CreateEventPage from "./components/host/CreateEventPage";
+import path from "node:path";
+import HostEventsPage from "./components/host/EventsPage";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---

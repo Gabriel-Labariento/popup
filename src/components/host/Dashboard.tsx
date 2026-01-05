@@ -1,12 +1,57 @@
-import { Button } from "@/components/ui/button"
-import { CheckCircle, Calendar} from "lucide-react"
-import { UserAuth } from "@/context/AuthContext"
-import { Link, useNavigate } from "react-router-dom";
-import { FormEvent } from "react";
+import { useEffect, useState } from "react";
+import { UserAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabase/client/supabase";
+import { Link } from "react-router-dom";
+import { CheckCircle, Calendar, Loader2 } from "lucide-react";
+import HostEventsPage from "./EventsPage";
 
 export function HostDashboard() {
-  const {session} = UserAuth();
+  const { session, loading } = UserAuth();
+  const [hasEvents, setHasEvents] = useState<boolean | null>(null); // null = loading
+  const [fetchingEvents, setFetchingEvents] = useState(true);
 
+  useEffect(() => {
+    async function checkEvents() {
+      if (!session?.user?.id) return;
+
+      try {
+        // We only need to know if at least one exists
+        const { count, error } = await supabase
+          .from('events')
+          .select('*', { count: 'exact', head: true }) // head: true makes it fast - no data returned, just count
+          .eq('host_id', session.user.id);
+
+        if (error) throw error;
+        
+        setHasEvents(count !== null && count > 0);
+      } catch (err) {
+        console.error("Error checking events:", err);
+        setHasEvents(false);
+      } finally {
+        setFetchingEvents(false);
+      }
+    }
+
+    if (!loading) {
+      checkEvents();
+    }
+  }, [session, loading]);
+
+  // 1. Show global loader while checking Auth and Database
+  if (loading || fetchingEvents) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // 2. If the user HAS events, show the List Page
+  if (hasEvents) {
+    return <HostEventsPage />;
+  }
+
+  // 3. If the user HAS NO events, show the Default CTA
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-2xl text-center">
@@ -31,17 +76,23 @@ export function HostDashboard() {
           </p>
 
           {/* CTA Button */}
-          <Link to="/host/create-event" className="inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8 text-base w-full hover:cursor-pointer" >
-                <Calendar className="mr-2 h-5 w-5" />
-                Post Your First Event
+          <Link 
+            to="/host/events/create" 
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8 text-base w-full"
+          >
+            <Calendar className="mr-2 h-5 w-5" />
+            Post Your First Event
           </Link>
         </div>
 
         {/* Secondary Action */}
-        <Link className="w-7/12 mb-3 button-styles" to="/host/profile">
+        <Link 
+          className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors underline" 
+          to="/host/profile"
+        >
           Go to My Profile
         </Link>
       </div>
     </div>
-  )
+  );
 }
