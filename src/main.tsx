@@ -4,6 +4,7 @@ import './index.css'
 import { RouterProvider} from 'react-router-dom'
 import { router } from './router'
 import { AuthContextProvider } from './context/AuthContext'
+import 'leaflet/dist/leaflet.css';
 
 const root = document.getElementById('root')! as HTMLElement
 createRoot(root).render(

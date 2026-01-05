@@ -30,6 +30,8 @@ export interface PopUpEvent {
   start_date: string;
   end_date: string;
   location_address: string;
+  location_lat: number,
+  location_lng: number,
   booth_price: number;
   price_negotiable: boolean;
   spots_available: number;
