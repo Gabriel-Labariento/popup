@@ -15,7 +15,7 @@ export function HostDashboard() {
       if (!session?.user?.id) return;
 
       try {
-        // We only need to know if at least one exists
+        // Check if at least one exists
         const { count, error } = await supabase
           .from('events')
           .select('*', { count: 'exact', head: true }) // head: true makes it fast - no data returned, just count

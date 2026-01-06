@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { 
   Calendar, MapPin, Users, Info, 
   Image as ImageIcon, Loader2, Plus, Trash2, 
-  PhilippinePeso
+  PhilippinePeso, ArrowLeft
 } from 'lucide-react';
 import type { PopUpEvent } from '@/types';
 import LocationPicker from '../LocationPicker';
@@ -12,10 +12,12 @@ import LocationPicker from '../LocationPicker';
 const CATEGORIES = ['MARKET', 'FESTIVAL', 'CONFERENCE', 'EXPO', 'OTHER'];
 const AMENITY_OPTIONS = ['WiFi', 'Electricity', 'Tables Provided', 'Chairs Provided', 'Indoor', 'Parking', 'Security'];
 
-const CreateEventPage = () => {
-  const { id } = useParams();
+const EditEventPage = () => {
+  const { id } = useParams(); // Get the ID from the URL
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  
+  const [loading, setLoading] = useState(!!id); // Loading if we have an ID to fetch
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState<Partial<PopUpEvent>>({
@@ -38,23 +40,40 @@ const CreateEventPage = () => {
   });
 
   useEffect(() => {
-    if (id) fetchEvent();
+    if (id) {
+      fetchEvent();
+    }
   }, [id]);
 
   async function fetchEvent() {
-    const { data } = await supabase.from('events').select('*').eq('id', id).single();
-    if (data) setFormData(data);
-  }
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    const toggleAmenity = (amenity: string) => {
-    const current = formData.amenities || [];
-    setFormData({
-      ...formData,
-      amenities: current.includes(amenity) 
-        ? current.filter(a => a !== amenity) 
-        : [...current, amenity]
-    });
-  };
+      if (error) throw error;
+
+      // Security Check: Ensure this event belongs to the logged-in host
+      if (data.host_id !== user?.id) {
+        alert("You do not have permission to edit this event.");
+        navigate('/host/dashboard');
+        return;
+      }
+
+      setFormData(data);
+    } catch (error) {
+      console.error('Error fetching event:', error);
+      alert("Could not load event data.");
+      navigate('/host/dashboard');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
@@ -67,7 +86,6 @@ const CreateEventPage = () => {
 
       const uploadPromises = files.map(async (file) => {
         const fileExt = file.name.split('.').pop();
-        // Fixed the typo in the template literal below
         const filePath = `events/${Math.random()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage.from('event-images').upload(filePath, file);
         if (uploadError) throw uploadError;
@@ -86,20 +104,45 @@ const CreateEventPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-
-    const payload = { ...formData, host_id: user?.id };
+    setSaving(true);
     
-    const { error } = id 
-      ? await supabase.from('events').update(payload).eq('id', id)
-      : await supabase.from('events').insert([payload]);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const payload = { ...formData, host_id: user?.id };
 
-    if (!error) navigate('/host/dashboard');
-    else alert(error.message);
-    setLoading(false);
+      let error;
+      if (id) {
+        // UPDATE existing
+        const { error: updateError } = await supabase
+          .from('events')
+          .update(payload)
+          .eq('id', id);
+        error = updateError;
+      } else {
+        // INSERT new
+        const { error: insertError } = await supabase
+          .from('events')
+          .insert([payload]);
+        error = insertError;
+      }
+
+      if (error) throw error;
+      
+      alert(id ? "Event updated successfully!" : "Event published successfully!");
+      navigate('/host/dashboard');
+    } catch (error: any) {
+      alert(error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
+  if (loading) return (
+    <div className="flex h-screen items-center justify-center">
+      <Loader2 className="animate-spin text-rose-600" size={48} />
+    </div>
+  );
+  
   const handleLocationSelect = (address: string, lat: number, lng: number) => {
     setFormData((prev) => ({
       ...prev,
@@ -108,6 +151,17 @@ const CreateEventPage = () => {
       location_lng: lng,
     }));
   };
+
+  const toggleAmenity = (amenity: string) => {
+    const current = formData.amenities || [];
+    setFormData({
+      ...formData,
+      amenities: current.includes(amenity) 
+        ? current.filter(a => a !== amenity) 
+        : [...current, amenity]
+    });
+  };
+
 
   return (
     <div className="max-w-6xl mx-auto py-6 sm:py-10 px-4">
@@ -290,4 +344,4 @@ const CreateEventPage = () => {
   );
 };
 
-export default CreateEventPage;
+export default EditEventPage
