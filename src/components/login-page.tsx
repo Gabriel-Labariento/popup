@@ -126,7 +126,7 @@ export function LoginPage() {
         {/* Footer */}
         <p className="mt-8 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
-          <Link to='/signup' 
+          <Link to='/' 
             className="font-semibold text-primary hover:underline underline-offset-4"
           >
             Sign up

@@ -10,17 +10,17 @@ import { UserAuth } from '@/context/AuthContext';
 export function Header() {
 	const [open, setOpen] = React.useState(false);
 	const navigate = useNavigate();
-	const {signOut} = UserAuth()
+	const { signOut } = UserAuth();
 
-	const handleSignOut = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      await signOut()
-      navigate("/login")
-    } catch (error) {
-      console.error("Error signing out: ", error)
-    }
-  }
+	const handleSignOut = async (e: React.FormEvent | React.MouseEvent) => {
+		e.preventDefault();
+		try {
+			await signOut();
+			navigate("/login");
+		} catch (error) {
+			console.error("Error signing out: ", error);
+		}
+	};
 
 	const links = [
 		{
@@ -42,10 +42,11 @@ export function Header() {
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
 				<Link to="/dashboard" className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 duration-100">
-					<img src={'../logo.svg'} className="size-6" />
+					<img src={'../icon.svg'} className="size-6" />
 					<p className="font-mono text-lg font-bold">Pop Up</p>
 				</Link>
 				<div className="flex items-center gap-2">
+					{/* EXPANDED DESKTOP VIEW */}
 					<div className="hidden items-center gap-1 lg:flex">
 						{links.map((link) => (
 							<a
@@ -55,9 +56,17 @@ export function Header() {
 								{link.label}
 							</a>
 						))}
-						{/* <Button variant="outline">Sign In</Button>
-					<Button>Get Started</Button> */}
+						
+						{/* NEW: Desktop Sign Out Button */}
+						<Button 
+							variant="ghost" 
+							onClick={handleSignOut}
+							className="text-muted-foreground hover:text-destructive transition-colors"
+						>
+							Sign Out
+						</Button>
 					</div>
+
 					<SearchModal data={blogs}>
 						<Button
 							variant="outline"
@@ -68,6 +77,8 @@ export function Header() {
 							<SearchIcon className="size-4" />
 						</Button>
 					</SearchModal>
+
+					{/* COLLAPSED MOBILE VIEW */}
 					<Sheet open={open} onOpenChange={setOpen}>
 						<Button
 							size="icon"
@@ -97,8 +108,8 @@ export function Header() {
 							</div>
 							<SheetFooter>
 								<Button variant="ghost" size="sm" className="w-6/12" onClick={handleSignOut}>
-          							Sign Out
-        						</Button>
+									Sign Out
+								</Button>
 							</SheetFooter>
 						</SheetContent>
 					</Sheet>
