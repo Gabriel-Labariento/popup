@@ -139,16 +139,6 @@ export function VendorDashboard() {
           ))}
         </div>
       )}
-
-      {/* Footer link to profile */}
-      <div className="mt-12 text-center border-t border-slate-100 pt-8">
-        <Link 
-          className="text-sm font-medium text-slate-500 hover:text-rose-600 transition-colors underline underline-offset-4" 
-          to="/vendor/profile"
-        >
-          Manage My Vendor Profile
-        </Link>
-      </div>
     </div>
   );
 }

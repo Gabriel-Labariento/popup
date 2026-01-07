@@ -11,6 +11,7 @@ import EditEventPage from "./components/host/EditEventPage";
 import ApplyEventPage from "./components/vendor/ApplyEventPage";
 import ReviewApplicationsPage from "./components/host/ReviewApplicationsPage";
 import VendorApplicationsPage from "./components/vendor/ApplicationsPage";
+import EventDetailsPage from "./components/vendor/EventDetailsPage";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---
@@ -50,8 +51,8 @@ export const router = createBrowserRouter([
           { path: 'dashboard', element: <VendorDashboard /> },
           { path: 'profile', element: <ProfilePage /> }, // Works for vendor/profile
           { path: 'events/:id/apply', element: <ApplyEventPage />},
-          { path: 'applications', element: <VendorApplicationsPage />}
-          // { path: 'discover', element: <EventDiscovery /> },
+          { path: 'applications', element: <VendorApplicationsPage />},
+          { path: '/vendor/events/:id', element: <EventDetailsPage /> }
         ]
       }
     ]
