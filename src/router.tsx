@@ -9,6 +9,7 @@ import ProfilePage from "./components/ProfilePage";
 import CreateEventPage from "./components/host/CreateEventPage";
 import EditEventPage from "./components/host/EditEventPage";
 import ApplyEventPage from "./components/vendor/ApplyEventPage";
+import ReviewApplicationsPage from "./components/host/ReviewApplicationsPage";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---
@@ -27,8 +28,9 @@ export const router = createBrowserRouter([
         children: [
           { path: 'dashboard', element: <HostDashboard /> },
           { path: 'profile', element: <ProfilePage /> }, 
-          { path: 'create-event', element: <CreateEventPage />},
-          { path: 'events/edit/:id', element: <EditEventPage />}
+          { path: 'events/create', element: <CreateEventPage />},
+          { path: 'events/edit/:id', element: <EditEventPage />},
+          { path: 'events/review/:id', element: <ReviewApplicationsPage />}
         ]
       }
     ]

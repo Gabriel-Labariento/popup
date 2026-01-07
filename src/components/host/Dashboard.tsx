@@ -77,7 +77,7 @@ export function HostDashboard() {
 
           {/* CTA Button */}
           <Link 
-            to="/host/create-event" 
+            to="/host/events/create" 
             className="inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-11 px-8 text-base w-full"
           >
             <Calendar className="mr-2 h-5 w-5" />
