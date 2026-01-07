@@ -97,7 +97,7 @@ const HostEventsPage = () => {
           <p className="text-slate-500">Manage your event listings and vendor applications</p>
         </div>
         <Link 
-          to="/host/events/create" 
+          to="/host/create-event" 
           className="flex items-center justify-center gap-2 bg-rose-600 text-white px-5 py-2.5 rounded-lg font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20"
         >
           <Plus size={20} />
@@ -237,7 +237,7 @@ const HostEventsPage = () => {
                     <div className="flex flex-col items-center gap-3">
                       <Calendar size={48} className="text-slate-200" />
                       <p className="text-slate-500 font-medium">No events found matching your search.</p>
-                      <Link to="/host/events/create" className="text-rose-600 font-bold hover:underline">
+                      <Link to="/host/create-event" className="text-rose-600 font-bold hover:underline">
                         Post your first event now
                       </Link>
                     </div>
