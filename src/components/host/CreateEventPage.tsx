@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import type { PopUpEvent } from '@/types';
 import LocationPicker from '../LocationPicker';
+import { useStorage } from '@/hooks/useStorage';
+import { MultiImagePicker } from '../ui/multi-image-picker';
+import { UserAuth } from '@/context/AuthContext';
+
 
 const CATEGORIES = ['MARKET', 'FESTIVAL', 'CONFERENCE', 'EXPO', 'OTHER'];
 const AMENITY_OPTIONS = ['WiFi', 'Electricity', 'Tables Provided', 'Chairs Provided', 'Indoor', 'Parking', 'Security'];
@@ -16,7 +20,8 @@ const CreateEventPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const {uploadImages, uploading} = useStorage('event-images')
+  const {session} = UserAuth()
 
   const [formData, setFormData] = useState<Partial<PopUpEvent>>({
     title: '',
@@ -56,33 +61,24 @@ const CreateEventPage = () => {
     });
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setUploading(true);
-      const files = Array.from(e.target.files || []);
-      if (files.length + (formData.images?.length || 0) > 5) {
-        alert("Maximum 5 images allowed");
-        return;
-      }
+  const handleFileChange = async (files: FileList) => {
+        if (!session?.user.id) return;
+        
+        const urls = await uploadImages(Array.from(files), session.user.id);
+        
+        setFormData(prev => ({
+            ...prev,
+            images: [...(prev.images || []), ...urls]
+        }));
+        };
 
-      const uploadPromises = files.map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        // Fixed the typo in the template literal below
-        const filePath = `events/${Math.random()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('event-images').upload(filePath, file);
-        if (uploadError) throw uploadError;
-        const { data } = supabase.storage.from('event-images').getPublicUrl(filePath);
-        return data.publicUrl;
-      });
+        const removeImage = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            images: prev.images && prev.images.filter((_, i) => i !== index)
+        }));
+    };
 
-      const urls = await Promise.all(uploadPromises);
-      setFormData({ ...formData, images: [...(formData.images || []), ...urls] });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,27 +255,19 @@ const CreateEventPage = () => {
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <ImageIcon size={20} className="text-rose-500"/> Images (Max 5)
               </h2>
-              <div className="grid grid-cols-3 gap-2">
-                {formData.images?.map((url, i) => (
-                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200">
-                    <img src={url} className="w-full h-full object-cover" alt={`Event ${i}`} />
-                    <button 
-                      type="button"
-                      onClick={() => setFormData({...formData, images: formData.images?.filter((_, idx) => idx !== i)})}
-                      className="absolute top-1 right-1 bg-black/60 p-1 rounded-full text-white hover:bg-black transition-colors"
-                    >
-                      <Trash2 size={12}/>
-                    </button>
-                  </div>
-                ))}
-                {(formData.images?.length || 0) < 5 && (
-                  <label className="aspect-square border-2 border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-rose-300 transition-all group">
-                    <Plus className="text-slate-400 group-hover:text-rose-500" />
-                    <span className="text-[10px] text-slate-400 font-bold uppercase mt-1 group-hover:text-rose-500">Add</span>
-                    <input type="file" hidden accept="image/*" multiple onChange={handleImageUpload} disabled={uploading} />
-                  </label>
-                )}
-              </div>
+              <MultiImagePicker 
+                images={formData.images || []} 
+                onUpload={handleFileChange} 
+                onRemove={(index) => {
+                    // Shared remove logic
+                    const key = 'images'
+                    setFormData({
+                    ...formData,
+                    [key]: formData[key] && formData[key].filter((_, i) => i !== index)
+                    });
+                }} 
+                uploading={uploading} 
+                />
               {uploading && <p className="text-xs text-rose-600 animate-pulse font-medium">Uploading images...</p>}
             </div>
           </div>
