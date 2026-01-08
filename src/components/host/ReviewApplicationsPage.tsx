@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client/supabase';
-import { 
-  ArrowLeft, CheckCircle, XCircle, Clock, 
-  ExternalLink, MessageSquare, Loader2, User 
+import {
+  ArrowLeft, CheckCircle, XCircle, Clock,
+  ExternalLink, MessageSquare, Loader2, User
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -44,7 +44,7 @@ const ReviewApplicationsPage = () => {
         .select('title')
         .eq('id', eventId)
         .single();
-      
+
       if (eventData) setEventTitle(eventData.title);
     } catch (error) {
       console.error('Error fetching applications:', error);
@@ -64,7 +64,7 @@ const ReviewApplicationsPage = () => {
       if (error) throw error;
 
       // Update local state to reflect the change immediately
-      setApplications(prev => prev.map(app => 
+      setApplications(prev => prev.map(app =>
         app.id === applicationId ? { ...app, status: newStatus } : app
       ));
     } catch (error: any) {
@@ -96,7 +96,7 @@ const ReviewApplicationsPage = () => {
         ) : (
           applications.map((app) => (
             <div key={app.id} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row">
-              
+
               {/* Vendor Info Sidebar */}
               <div className="p-6 border-b md:border-b-0 md:border-r border-slate-100 md:w-64 bg-slate-50/50">
                 <div className="flex flex-col items-center text-center">
@@ -104,7 +104,7 @@ const ReviewApplicationsPage = () => {
                     {app.vendor?.logo_url ? (
                       <img src={app.vendor.logo_url} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="h-full w-full flex items-center justify-center text-slate-300"><User size={32}/></div>
+                      <div className="h-full w-full flex items-center justify-center text-slate-300"><User size={32} /></div>
                     )}
                   </div>
                   <h3 className="font-bold text-slate-900">{app.vendor?.business_name || 'Unknown Business'}</h3>
@@ -113,14 +113,13 @@ const ReviewApplicationsPage = () => {
                       View Website <ExternalLink size={12} />
                     </a>
                   )}
-                  
+
                   <div className="mt-6 w-full">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Status</p>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold border block text-center ${
-                      app.status === 'ACCEPTED' ? 'bg-green-100 text-green-700 border-green-200' :
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold border block text-center ${app.status === 'ACCEPTED' ? 'bg-green-100 text-green-700 border-green-200' :
                       app.status === 'REJECTED' ? 'bg-red-100 text-red-700 border-red-200' :
-                      'bg-amber-100 text-amber-700 border-amber-200'
-                    }`}>
+                        'bg-amber-100 text-amber-700 border-amber-200'
+                      }`}>
                       {app.status}
                     </span>
                   </div>
@@ -152,18 +151,18 @@ const ReviewApplicationsPage = () => {
                 {/* Actions */}
                 <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
                   <p className="text-xs text-slate-400">Applied on {format(new Date(app.applied_at), 'MMM dd, yyyy')}</p>
-                  
+
                   <div className="flex gap-3">
                     {app.status === 'PENDING' ? (
                       <>
-                        <button 
+                        <button
                           onClick={() => updateStatus(app.id, 'REJECTED')}
                           disabled={!!updatingId}
                           className="flex items-center gap-2 px-4 py-2 text-sm font-bold text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                         >
                           <XCircle size={18} /> Reject
                         </button>
-                        <button 
+                        <button
                           onClick={() => updateStatus(app.id, 'ACCEPTED')}
                           disabled={!!updatingId}
                           className="flex items-center gap-2 px-6 py-2 text-sm font-bold bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-lg shadow-green-600/20 disabled:opacity-50"
@@ -173,12 +172,24 @@ const ReviewApplicationsPage = () => {
                         </button>
                       </>
                     ) : (
-                      <button 
-                        onClick={() => updateStatus(app.id, 'PENDING')}
-                        className="text-xs text-slate-400 hover:underline"
-                      >
-                        Reset to Pending
-                      </button>
+                      <div className="flex gap-3 items-center">
+                        <button
+                          onClick={() => updateStatus(app.id, 'PENDING')}
+                          className="text-xs text-slate-400 hover:underline mr-2"
+                        >
+                          Reset to Pending
+                        </button>
+
+                        {app.status === 'ACCEPTED' && (
+                          <Link
+                            to={`/host/messages/${app.id}`}
+                            className="flex items-center gap-2 px-4 py-2 text-sm font-bold border border-rose-200 text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
+                          >
+                            <MessageSquare size={18} />
+                            Message
+                          </Link>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

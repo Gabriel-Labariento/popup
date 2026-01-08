@@ -12,6 +12,8 @@ import ApplyEventPage from "./components/vendor/ApplyEventPage";
 import ReviewApplicationsPage from "./components/host/ReviewApplicationsPage";
 import VendorApplicationsPage from "./components/vendor/ApplicationsPage";
 import EventDetailsPage from "./components/vendor/EventDetailsPage";
+import HostChatPage from "./components/host/HostChatPage";
+import VendorChatPage from "./components/vendor/VendorChatPage";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---
@@ -29,10 +31,11 @@ export const router = createBrowserRouter([
         element: <Layout />, // TODO: Specialized layout with Host Sidebar
         children: [
           { path: 'dashboard', element: <HostDashboard /> },
-          { path: 'profile', element: <ProfilePage /> }, 
-          { path: 'events/create', element: <CreateEventPage />},
-          { path: 'events/edit/:id', element: <EditEventPage />},
-          { path: 'events/review/:id', element: <ReviewApplicationsPage />}
+          { path: 'profile', element: <ProfilePage /> },
+          { path: 'events/create', element: <CreateEventPage /> },
+          { path: 'events/edit/:id', element: <EditEventPage /> },
+          { path: 'events/:id/review', element: <ReviewApplicationsPage /> },
+          { path: 'messages/:applicationId', element: <HostChatPage /> }
         ]
       }
     ]
@@ -50,8 +53,9 @@ export const router = createBrowserRouter([
         children: [
           { path: 'dashboard', element: <VendorDashboard /> },
           { path: 'profile', element: <ProfilePage /> }, // Works for vendor/profile
-          { path: 'events/:id/apply', element: <ApplyEventPage />},
-          { path: 'applications', element: <VendorApplicationsPage />},
+          { path: 'events/:id/apply', element: <ApplyEventPage /> },
+          { path: 'applications', element: <VendorApplicationsPage /> },
+          { path: 'messages/:applicationId', element: <VendorChatPage /> },
           { path: '/vendor/events/:id', element: <EventDetailsPage /> }
         ]
       }
