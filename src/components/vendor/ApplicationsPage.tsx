@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { Link } from 'react-router-dom';
-import { 
-  Clock, CheckCircle2, XCircle, MapPin, 
+import {
+  Clock, CheckCircle2, XCircle, MapPin,
   Calendar, ArrowRight, Loader2, Inbox,
   Building2
 } from 'lucide-react';
@@ -42,8 +43,9 @@ export default function VendorApplicationsPage() {
 
       if (error) throw error;
       setApplications(data || []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching applications:', err);
+      toast.error(`Error loading applications: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -94,8 +96,8 @@ export default function VendorApplicationsPage() {
           </div>
           <h3 className="text-xl font-bold text-slate-900">No applications yet</h3>
           <p className="text-slate-500 mt-2 mb-6">You haven't applied to any events yet. Ready to grow your business?</p>
-          <Link 
-            to="/vendor/dashboard" 
+          <Link
+            to="/vendor/dashboard"
             className="inline-flex items-center gap-2 bg-rose-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-rose-700 transition-all shadow-lg shadow-rose-600/20"
           >
             Find Events to Join
@@ -106,16 +108,16 @@ export default function VendorApplicationsPage() {
           {applications.map((app) => {
             const status = getStatusDisplay(app.status);
             return (
-              <div 
-                key={app.id} 
+              <div
+                key={app.id}
                 className="bg-white rounded-xl border border-slate-200 shadow-sm hover:border-rose-200 transition-all overflow-hidden"
               >
                 <div className="p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                  
+
                   {/* Event Info */}
                   <div className="flex-1 space-y-3">
                     <div className="flex items-center gap-2">
-                       <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider ${status.classes}`}>
+                      <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider ${status.classes}`}>
                         {status.icon}
                         {status.text}
                       </span>
@@ -123,7 +125,7 @@ export default function VendorApplicationsPage() {
                         Applied {format(new Date(app.applied_at), 'MMM dd, yyyy')}
                       </p>
                     </div>
-                    
+
                     <div>
                       <h3 className="text-xl font-bold text-slate-900">{app.event.title}</h3>
                       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
@@ -145,15 +147,15 @@ export default function VendorApplicationsPage() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-3 border-t md:border-t-0 pt-4 md:pt-0">
-                    <Link 
+                    <Link
                       to={`/vendor/events/${app.event.id}`}
                       className="flex-1 md:flex-none text-center px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors border border-slate-200"
                     >
                       View Event
                     </Link>
-                    
+
                     {app.status === 'ACCEPTED' && (
-                      <Link 
+                      <Link
                         to={`/vendor/messages/${app.id}`}
                         className="flex-1 md:flex-none text-center px-4 py-2 text-sm font-bold bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition-colors shadow-md shadow-rose-600/10 flex items-center justify-center gap-2"
                       >

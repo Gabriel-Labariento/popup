@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from "sonner";
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client/supabase';
 import {
@@ -6,6 +7,7 @@ import {
   ExternalLink, MessageSquare, Loader2, User
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { ReportButton } from '@/components/ui/ReportButton';
 
 const ReviewApplicationsPage = () => {
   const { id: eventId } = useParams();
@@ -46,8 +48,9 @@ const ReviewApplicationsPage = () => {
         .single();
 
       if (eventData) setEventTitle(eventData.title);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching applications:', error);
+      toast.error(error.message || "Failed to load applications");
     } finally {
       setLoading(false);
     }
@@ -56,6 +59,21 @@ const ReviewApplicationsPage = () => {
   const updateStatus = async (applicationId: string, newStatus: 'ACCEPTED' | 'REJECTED' | 'PENDING') => {
     try {
       setUpdatingId(applicationId);
+      if (newStatus === 'ACCEPTED') {
+        const { data: eventData, error: eventError } = await supabase
+          .from('events')
+          .select('spots_available, spots_filled')
+          .eq('id', eventId)
+          .single();
+
+        if (eventError) throw eventError;
+
+        if (eventData && eventData.spots_filled >= eventData.spots_available) {
+          toast.error("This event is already full!");
+          return;
+        }
+      }
+
       const { error } = await supabase
         .from('applications')
         .update({ status: newStatus, reviewed_at: new Date().toISOString() })
@@ -63,12 +81,9 @@ const ReviewApplicationsPage = () => {
 
       if (error) throw error;
 
-      // Update local state to reflect the change immediately
-      setApplications(prev => prev.map(app =>
-        app.id === applicationId ? { ...app, status: newStatus } : app
-      ));
+      toast.success(`Application ${newStatus.toLowerCase()} successfully`);
     } catch (error: any) {
-      alert(error.message);
+      toast.error(error.message || "Failed to update application status");
     } finally {
       setUpdatingId(null);
     }
@@ -114,14 +129,28 @@ const ReviewApplicationsPage = () => {
                     </a>
                   )}
 
-                  <div className="mt-6 w-full">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Status</p>
-                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold border block text-center ${app.status === 'ACCEPTED' ? 'bg-green-100 text-green-700 border-green-200' :
-                      app.status === 'REJECTED' ? 'bg-red-100 text-red-700 border-red-200' :
-                        'bg-amber-100 text-amber-700 border-amber-200'
-                      }`}>
-                      {app.status}
-                    </span>
+                  <div className="mt-6 w-full space-y-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Status</p>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold border block text-center ${app.status === 'ACCEPTED' ? 'bg-green-100 text-green-700 border-green-200' :
+                        app.status === 'REJECTED' ? 'bg-red-100 text-red-700 border-red-200' :
+                          'bg-amber-100 text-amber-700 border-amber-200'
+                        }`}>
+                        {app.status}
+                      </span>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-200 flex justify-center">
+                      <ReportButton
+                        type="vendor"
+                        id={app.vendor_id}
+                        name={app.vendor?.business_name || 'Unknown Vendor'}
+                        variant="ghost"
+                        size="sm"
+                        label="Report Vendor"
+                        className="text-xs text-slate-400"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

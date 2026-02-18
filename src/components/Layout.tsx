@@ -4,7 +4,7 @@ import Nav from "./Nav";
 export default function Layout() {
     return (
         <div className="app-container">
-            <Nav></Nav>
+            <Nav links={[]} />
             <main>
                 <Outlet></Outlet>
             </main>

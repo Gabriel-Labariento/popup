@@ -7,7 +7,14 @@ import { CommandItem, SearchModal } from '@/components/ui/search-modal';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserAuth } from '@/context/AuthContext';
 
-export function Header() {
+export interface HeaderProps {
+	links: {
+		label: string;
+		href: string;
+	}[];
+}
+
+export function Header({ links }: HeaderProps) {
 	const [open, setOpen] = React.useState(false);
 	const navigate = useNavigate();
 	const { signOut } = UserAuth();
@@ -22,17 +29,6 @@ export function Header() {
 		}
 	};
 
-	const links = [
-		{
-			label: 'Profile',
-			href: 'profile',
-		},
-		{
-			label: 'Applications',
-			href: 'applications',
-		},
-	];
-
 	return (
 		<header
 			className={cn(
@@ -42,24 +38,24 @@ export function Header() {
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
 				<Link to="/dashboard" className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 duration-100">
-					<img src={'../icon.svg'} className="size-6" />
+					<img src="/icon.png" className="size-6" />
 					<p className="font-mono text-lg font-bold">Pop Up</p>
 				</Link>
 				<div className="flex items-center gap-2">
 					{/* EXPANDED DESKTOP VIEW */}
 					<div className="hidden items-center gap-1 lg:flex">
 						{links.map((link) => (
-							<a
+							<Link
 								className={buttonVariants({ variant: 'ghost' })}
-								href={link.href} key={link.href}
+								to={link.href} key={link.href}
 							>
 								{link.label}
-							</a>
+							</Link>
 						))}
-						
+
 						{/* NEW: Desktop Sign Out Button */}
-						<Button 
-							variant="ghost" 
+						<Button
+							variant="ghost"
 							onClick={handleSignOut}
 							className="text-muted-foreground hover:text-destructive transition-colors"
 						>
@@ -95,15 +91,15 @@ export function Header() {
 						>
 							<div className="grid gap-y-2 overflow-y-auto px-4 pt-12 pb-5">
 								{links.map((link) => (
-									<a
+									<Link
 										className={buttonVariants({
 											variant: 'ghost',
 											className: 'justify-start',
 										})}
-										href={link.href} key={link.href}
+										to={link.href} key={link.href}
 									>
 										{link.label}
-									</a>
+									</Link>
 								))}
 							</div>
 							<SheetFooter>

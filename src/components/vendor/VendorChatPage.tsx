@@ -9,10 +9,11 @@ export default function VendorChatPage() {
     const { applicationId } = useParams();
     const { session } = UserAuth();
     const navigate = useNavigate();
-    
+
     const [loading, setLoading] = useState(true);
     const [chatDetails, setChatDetails] = useState<{
         hostName: string;
+        hostImage?: string | null;
         eventTitle: string;
     } | null>(null);
 
@@ -23,7 +24,7 @@ export default function VendorChatPage() {
     async function fetchDetails() {
         try {
             setLoading(true);
-            
+
             // Clean query thanks to the Foreign Keys we established
             const { data, error } = await supabase
                 .from('applications')
@@ -32,7 +33,7 @@ export default function VendorChatPage() {
                     status,
                     event:events (
                         title,
-                        host:hosts (organization_name)
+                        host:hosts (organization_name, avatar_url)
                     )
                 `)
                 .eq('id', applicationId)
@@ -53,12 +54,23 @@ export default function VendorChatPage() {
                 // For now, we'll just show the chat
             }
 
-            // Simplified data access
-            const eventData = data.event as any;
+            interface ApplicationData {
+                vendor_id: string;
+                status: string;
+                event: {
+                    title: string;
+                    host: { organization_name: string };
+                };
+            }
+
+            // Simplified data access with type safety
+            const appData = data as unknown as ApplicationData;
+            const eventData = appData.event;
             const hostData = eventData?.host;
 
             setChatDetails({
                 hostName: hostData?.organization_name || 'Event Host',
+                hostImage: (hostData as any)?.avatar_url || null,
                 eventTitle: eventData?.title || 'Event'
             });
         } catch (error) {
@@ -93,8 +105,8 @@ export default function VendorChatPage() {
         <div className="max-w-4xl mx-auto py-6 sm:py-10 px-4">
             {/* Navigation Header */}
             <div className="flex items-center justify-between mb-6">
-                <Link 
-                    to="/vendor/applications" 
+                <Link
+                    to="/vendor/applications"
                     className="inline-flex items-center gap-2 text-slate-500 hover:text-rose-600 transition-colors font-medium text-sm"
                 >
                     <ArrowLeft size={16} /> Back to My Applications
@@ -119,8 +131,9 @@ export default function VendorChatPage() {
                 applicationId={applicationId}
                 currentUserId={session.user.id}
                 otherPartyName={chatDetails.hostName}
+                otherPartyImage={chatDetails.hostImage}
             />
-            
+
             <p className="mt-4 text-center text-[10px] text-slate-400">
                 Messages are encrypted and visible only to you and the host.
             </p>

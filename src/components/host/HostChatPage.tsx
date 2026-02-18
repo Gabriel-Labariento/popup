@@ -11,6 +11,7 @@ export default function HostChatPage() {
     const [loading, setLoading] = useState(true);
     const [chatDetails, setChatDetails] = useState<{
         vendorName: string;
+        vendorImage?: string | null;
         eventTitle: string;
     } | null>(null);
 
@@ -23,7 +24,7 @@ export default function HostChatPage() {
             const { data, error } = await supabase
                 .from('applications')
                 .select(`
-          vendor:vendors (business_name),
+          vendor:vendors (business_name, logo_url),
           event:events (title)
         `)
                 .eq('id', applicationId)
@@ -31,10 +32,23 @@ export default function HostChatPage() {
 
             if (error) throw error;
 
-            const typedData = data as any;
+            interface ApplicationData {
+                vendor: { business_name: string } | { business_name: string }[] | null;
+                event: { title: string } | { title: string }[] | null;
+            }
+
+            const typedData = data as unknown as ApplicationData;
+
+            // Helper to handle Supabase's potential array return if relationship is one-to-many (though here it should be single)
+            const getVendorName = (v: ApplicationData['vendor']) =>
+                Array.isArray(v) ? v[0]?.business_name : v?.business_name;
+            const getEventTitle = (e: ApplicationData['event']) =>
+                Array.isArray(e) ? e[0]?.title : e?.title;
+
             setChatDetails({
-                vendorName: (Array.isArray(typedData.vendor) ? typedData.vendor[0]?.business_name : typedData.vendor?.business_name) || 'Vendor',
-                eventTitle: (Array.isArray(typedData.event) ? typedData.event[0]?.title : typedData.event?.title) || 'Event'
+                vendorName: getVendorName(typedData.vendor) || 'Vendor',
+                vendorImage: (typedData.vendor as any)?.logo_url || null, // Cast to any to avoid strict type issues if interface isn't fully updated
+                eventTitle: getEventTitle(typedData.event) || 'Event'
             });
         } catch (error) {
             console.error('Error fetching chat details:', error);
@@ -63,6 +77,7 @@ export default function HostChatPage() {
                 applicationId={applicationId!}
                 currentUserId={session.user.id}
                 otherPartyName={chatDetails.vendorName}
+                otherPartyImage={chatDetails.vendorImage}
             />
         </div>
     );

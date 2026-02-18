@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { Link } from 'react-router-dom';
 import {
@@ -64,8 +65,9 @@ export function VendorDashboard() {
 
       if (error) throw error;
       setEvents(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching events:', error);
+      toast.error(error.message || "Failed to load events. Please try again.");
     } finally {
       setLoading(false);
     }

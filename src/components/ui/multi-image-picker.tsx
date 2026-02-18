@@ -14,7 +14,7 @@ export const MultiImagePicker = ({ images, onUpload, onRemove, uploading, max = 
     <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
       {images.map((url, i) => (
         <div key={i} className="relative aspect-square rounded-xl overflow-hidden border group">
-          <img src={url} className="w-full h-full object-cover" alt="Preview" />
+          <img src={url} className="w-full h-full object-cover" alt="Preview" loading="lazy" />
           <button
             type="button"
             onClick={() => onRemove(i)}

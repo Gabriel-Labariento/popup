@@ -1,16 +1,15 @@
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { Eye, EyeOff, Check, X } from "lucide-react"
-import type { UserRole } from "@/App"
+import type { UserRole } from "@/types"
 import { UserAuth } from "@/context/AuthContext"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 
 interface AccountCreationStepProps {
-  selectedRole: UserRole
+  selectedRole: UserRole | null
   onNext: () => void
 }
 
@@ -23,11 +22,11 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  console.log("here")
 
-  const {session, signUpNewUser} = UserAuth()
-  console.log(session)
-  
+
+  const { session, signUpNewUser } = UserAuth()
+
+
   const passwordRequirements = {
     minLength: password.length >= 8,
     hasNumber: /\d/.test(password),
@@ -47,16 +46,25 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
       return
     }
 
+    if (!selectedRole) {
+      setError("Please select a role")
+      return
+    }
+
     setLoading(true)
     setError("")
     try {
-      const result = await signUpNewUser({email, password}, selectedRole)
+      const result = await signUpNewUser({ email, password }, selectedRole)
       if (result?.success) {
         if (selectedRole == 'HOST') navigate('/host/dashboard')
         else if (selectedRole == 'VENDOR') navigate('/vendor/dashboard')
         onNext()
       } else {
-        setError(result?.error?.message || "Failed to create account")
+        if (result?.error?.message === "User already registered") {
+          setError("This email is already registered. Please log in instead.");
+        } else {
+          setError(result?.error?.message || "Failed to create account")
+        }
       }
     } catch (error) {
       setError("An error occurred during account creation")
@@ -70,6 +78,14 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
+          <div className="mb-6 flex justify-center">
+            <div className="flex items-center gap-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl">
+                <img src="/icon.png" alt="Pop Up Logo" className="h-8 w-8" />
+              </div>
+              <span className="text-xl font-bold text-foreground">Pop Up</span>
+            </div>
+          </div>
           <h2 className="mb-3 text-3xl font-bold text-foreground">Create Your Account</h2>
           <p className="text-balance text-muted-foreground">
             {selectedRole === "HOST" ? "Start connecting with pop-up vendors" : "Start discovering events near you"}
@@ -167,10 +183,24 @@ export function AccountCreationStep({ selectedRole, onNext }: AccountCreationSte
             We don&apos;t share your contact details publicly. Your privacy is protected.
           </p>
 
+          {error && (
+            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
           {/* Submit */}
           <Button type="submit" size="lg" className="w-full" disabled={!isFormValid}>
             Create Account
           </Button>
+
+          {/* Login Link */}
+          <p className="text-center text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link to="/login" className="font-semibold text-primary hover:underline underline-offset-4">
+              Log in
+            </Link>
+          </p>
         </form>
       </div>
     </div>

@@ -1,10 +1,14 @@
+
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { OnboardingPage } from "./components/onboarding/Onboarding";
 import { LoginPage } from "./components/login-page";
+import { ForgotPassword } from "./components/forgot-password";
+import { UpdatePassword } from "./components/update-password";
+import { HowItWorks } from "./components/onboarding/how-it-works";
 import { HostDashboard } from "./components/host/Dashboard";
 import { VendorDashboard } from "./components/vendor/Dashboard";
-import Layout from "./components/Layout";
 import { RoleGuard } from "./components/RoleGuard";
+import { ProfileGuard } from "./components/ProfileGuard";
 import ProfilePage from "./components/ProfilePage";
 import CreateEventPage from "./components/host/CreateEventPage";
 import EditEventPage from "./components/host/EditEventPage";
@@ -14,11 +18,36 @@ import VendorApplicationsPage from "./components/vendor/ApplicationsPage";
 import EventDetailsPage from "./components/vendor/EventDetailsPage";
 import HostChatPage from "./components/host/HostChatPage";
 import VendorChatPage from "./components/vendor/VendorChatPage";
+import HostLayout from "./components/host/HostLayout";
+import VendorLayout from "./components/vendor/VendorLayout";
+import { GlobalError } from "./components/GlobalError";
+import { NotFound } from "./components/NotFound";
+import PrivacyPage from "./components/PrivacyPage";
+import TermsPage from "./components/TermsPage";
+import ContactPage from "./components/ContactPage";
+import { PublicLayout } from "./components/PublicLayout";
+import { ScamSafetyPage } from "./components/ScamSafetyPage";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---
-  { path: '/', element: <OnboardingPage /> },
+  {
+    path: '/',
+    element: <OnboardingPage />,
+    errorElement: <GlobalError />
+  },
   { path: '/login', element: <LoginPage /> },
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/update-password', element: <UpdatePassword /> },
+  { path: '/how-it-works', element: <HowItWorks /> },
+  {
+    element: <PublicLayout />,
+    children: [
+      { path: '/privacy', element: <PrivacyPage /> },
+      { path: '/terms', element: <TermsPage /> },
+      { path: '/contact', element: <ContactPage /> },
+      { path: '/scam-safety', element: <ScamSafetyPage /> },
+    ]
+  },
 
   // --- HOST ROUTES ---
   {
@@ -26,16 +55,22 @@ export const router = createBrowserRouter([
     element: (
       <RoleGuard allowedRole="HOST" />
     ),
+    errorElement: <GlobalError />,
     children: [
       {
-        element: <Layout />, // TODO: Specialized layout with Host Sidebar
+        element: <ProfileGuard />, // Enforce profile completion
         children: [
-          { path: 'dashboard', element: <HostDashboard /> },
-          { path: 'profile', element: <ProfilePage /> },
-          { path: 'events/create', element: <CreateEventPage /> },
-          { path: 'events/edit/:id', element: <EditEventPage /> },
-          { path: 'events/:id/review', element: <ReviewApplicationsPage /> },
-          { path: 'messages/:applicationId', element: <HostChatPage /> }
+          {
+            element: <HostLayout />,
+            children: [
+              { path: 'dashboard', element: <HostDashboard /> },
+              { path: 'profile', element: <ProfilePage /> },
+              { path: 'events/create', element: <CreateEventPage /> },
+              { path: 'events/edit/:id', element: <EditEventPage /> },
+              { path: 'events/:id/review', element: <ReviewApplicationsPage /> },
+              { path: 'messages/:applicationId', element: <HostChatPage /> }
+            ]
+          }
         ]
       }
     ]
@@ -47,16 +82,22 @@ export const router = createBrowserRouter([
     element: (
       <RoleGuard allowedRole="VENDOR" />
     ),
+    errorElement: <GlobalError />,
     children: [
       {
-        element: <Layout />, // TODO: Specialized layout with Vendor Sidebar
+        element: <ProfileGuard />, // Enforce profile completion
         children: [
-          { path: 'dashboard', element: <VendorDashboard /> },
-          { path: 'profile', element: <ProfilePage /> }, // Works for vendor/profile
-          { path: 'events/:id/apply', element: <ApplyEventPage /> },
-          { path: 'applications', element: <VendorApplicationsPage /> },
-          { path: 'messages/:applicationId', element: <VendorChatPage /> },
-          { path: '/vendor/events/:id', element: <EventDetailsPage /> }
+          {
+            element: <VendorLayout />,
+            children: [
+              { path: 'dashboard', element: <VendorDashboard /> },
+              { path: 'profile', element: <ProfilePage /> }, // Works for vendor/profile
+              { path: 'events/:id/apply', element: <ApplyEventPage /> },
+              { path: 'applications', element: <VendorApplicationsPage /> },
+              { path: 'messages/:applicationId', element: <VendorChatPage /> },
+              { path: '/vendor/events/:id', element: <EventDetailsPage /> }
+            ]
+          }
         ]
       }
     ]
@@ -67,6 +108,6 @@ export const router = createBrowserRouter([
     element: <RoleGuard allowedRole={undefined}></RoleGuard>
   },
   // --- CATCH ALL ---
-  { path: '*', element: <Navigate to="/dashboard" replace /> }
+  { path: '*', element: <NotFound /> }
 ]);
 

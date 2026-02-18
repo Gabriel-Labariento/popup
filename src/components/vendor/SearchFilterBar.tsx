@@ -13,8 +13,10 @@ export interface FilterState {
     dateRange: string;
 }
 
+import { EVENT_CATEGORIES } from '@/constants/categories';
+
 export const CATEGORIES = [
-    "All", "Food & Beverage", "Arts & Crafts", "Fashion", "Tech", "Music", "Other"
+    "All", ...EVENT_CATEGORIES
 ];
 
 export const PRICE_RANGES = [
@@ -25,14 +27,24 @@ export const PRICE_RANGES = [
     { label: "Above ₱5,000", value: "above_5000" },
 ];
 
+import { useDebounceValue } from 'usehooks-ts';
+
 export function SearchFilterBar({ onSearch, onFilterChange, filters }: SearchFilterBarProps) {
     const [showFilters, setShowFilters] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState('');
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const val = e.target.value;
-        setSearchTerm(val);
-        onSearch(val);
+        setSearchTerm(e.target.value);
+    };
+
+    const handleSearchClick = () => {
+        onSearch(searchTerm);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            onSearch(searchTerm);
+        }
     };
 
     const handleFilterUpdate = (key: keyof FilterState, value: string) => {
@@ -54,17 +66,24 @@ export function SearchFilterBar({ onSearch, onFilterChange, filters }: SearchFil
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
                     <input
                         type="text"
-                        placeholder="Search events by name, location..."
+                        placeholder="Search events..." // shortened placeholder to save space
                         className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent shadow-sm"
                         value={searchTerm}
                         onChange={handleSearchChange}
+                        onKeyDown={handleKeyDown}
                     />
                 </div>
                 <button
+                    onClick={handleSearchClick}
+                    className="px-6 py-3 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-700 transition-colors shadow-sm"
+                >
+                    Search
+                </button>
+                <button
                     onClick={() => setShowFilters(!showFilters)}
                     className={`px-4 py-3 rounded-xl border font-medium flex items-center gap-2 transition-colors ${showFilters || activeFilterCount > 0
-                            ? 'bg-rose-50 border-rose-200 text-rose-700'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                        ? 'bg-rose-50 border-rose-200 text-rose-700'
+                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                         }`}
                 >
                     <SlidersHorizontal size={20} />
@@ -95,7 +114,9 @@ export function SearchFilterBar({ onSearch, onFilterChange, filters }: SearchFil
                                 className="w-full p-2.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm"
                             >
                                 {CATEGORIES.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
+                                    <option key={cat} value={cat}>
+                                        {cat === "All" ? cat : cat.charAt(0) + cat.slice(1).toLowerCase()}
+                                    </option>
                                 ))}
                             </select>
                         </div>

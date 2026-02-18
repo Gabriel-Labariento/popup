@@ -1,3 +1,5 @@
+import { EventCategory } from './constants/categories'; // Adjust path if needed
+
 export type UserRole = 'HOST' | 'VENDOR';
 
 export interface HostProfile {
@@ -26,7 +28,7 @@ export interface PopUpEvent {
   host_id: string;
   title: string;
   description: string;
-  category: string;
+  category: EventCategory;
   start_date: string;
   end_date: string;
   location_address: string;
