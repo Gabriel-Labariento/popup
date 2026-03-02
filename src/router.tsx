@@ -12,7 +12,7 @@ import { ProfileGuard } from "./components/ProfileGuard";
 import ProfilePage from "./components/ProfilePage";
 import CreateEventPage from "./components/host/CreateEventPage";
 import EditEventPage from "./components/host/EditEventPage";
-import ApplyEventPage from "./components/vendor/ApplyEventPage";
+import ApplyEventPage from "./components/vendor/ApplyEventPage.tsx";
 import ReviewApplicationsPage from "./components/host/ReviewApplicationsPage";
 import VendorApplicationsPage from "./components/vendor/ApplicationsPage";
 import EventDetailsPage from "./components/vendor/EventDetailsPage";

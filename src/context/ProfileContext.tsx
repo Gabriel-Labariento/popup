@@ -19,7 +19,6 @@ export const ProfileContextProvider = ({ children }: { children: ReactNode }) =>
 
     const fetchProfile = useCallback(async () => {
         if (!session?.user) {
-            console.log("[ProfileContext] No user session found. Setting profile to null.");
             setProfile(null);
             setLoading(false);
             return;
@@ -28,7 +27,6 @@ export const ProfileContextProvider = ({ children }: { children: ReactNode }) =>
         try {
             setLoading(true);
             const role = session.user.user_metadata.role as UserRole;
-            console.log("[ProfileContext] Fetching profile for user:", session.user.id, "Role:", role);
 
             const table = role === 'HOST' ? 'hosts' : 'vendors';
 
@@ -42,7 +40,6 @@ export const ProfileContextProvider = ({ children }: { children: ReactNode }) =>
                 console.error("[ProfileContext] Error fetching profile:", error);
             }
 
-            console.log("[ProfileContext] Profile data fetched:", data);
             setProfile(data);
         } catch (error) {
             console.error("[ProfileContext] Unexpected error fetching profile:", error);
@@ -63,8 +60,6 @@ export const ProfileContextProvider = ({ children }: { children: ReactNode }) =>
         // Basic check: must have a name. You can expand this logic.
         ('organization_name' in profile ? profile.organization_name : profile.business_name)
     );
-
-    console.log("[ProfileContext] State - Loading:", loading, "IsComplete:", isComplete, "Profile:", profile);
 
     return (
         <ProfileContext.Provider value={{ profile, loading, isComplete, refetch: fetchProfile }}>

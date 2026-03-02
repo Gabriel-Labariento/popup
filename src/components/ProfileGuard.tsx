@@ -27,7 +27,6 @@ export const ProfileGuard = () => {
 
     useEffect(() => {
         if (!isLoading && !isComplete && !isProfilePage) {
-            console.log("[ProfileGuard] Creating blocking toast. Redirect imminent.");
             toast.error("Please complete your profile to continue.", {
                 id: "profile-incomplete-toast", // Prevent duplicate toasts
                 duration: 5000,
@@ -45,10 +44,8 @@ export const ProfileGuard = () => {
 
     // If profile is incomplete and we are NOT on the profile page, redirect to profile
     if (!isComplete && !isProfilePage) {
-        console.log("[ProfileGuard] Redirecting to profile page due to incomplete profile.");
         return <Navigate to={profilePath} replace />;
     }
 
-    console.log("[ProfileGuard] Access granted.");
     return <Outlet />;
 };
