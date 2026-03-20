@@ -1,5 +1,5 @@
 
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import { OnboardingPage } from "./components/onboarding/Onboarding";
 import { LoginPage } from "./components/login-page";
 import { ForgotPassword } from "./components/forgot-password";
@@ -27,6 +27,8 @@ import TermsPage from "./components/TermsPage";
 import ContactPage from "./components/ContactPage";
 import { PublicLayout } from "./components/PublicLayout";
 import { ScamSafetyPage } from "./components/ScamSafetyPage";
+import { AuthCallback } from "./components/auth/AuthCallback";
+import { RoleSelectionPage } from "./components/auth/RoleSelectionPage";
 
 export const router = createBrowserRouter([
   // --- PUBLIC ROUTES ---
@@ -39,6 +41,8 @@ export const router = createBrowserRouter([
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/update-password', element: <UpdatePassword /> },
   { path: '/how-it-works', element: <HowItWorks /> },
+  { path: '/auth/callback', element: <AuthCallback /> },
+  { path: '/select-role', element: <RoleSelectionPage /> },
   {
     element: <PublicLayout />,
     children: [
@@ -95,7 +99,7 @@ export const router = createBrowserRouter([
               { path: 'events/:id/apply', element: <ApplyEventPage /> },
               { path: 'applications', element: <VendorApplicationsPage /> },
               { path: 'messages/:applicationId', element: <VendorChatPage /> },
-              { path: '/vendor/events/:id', element: <EventDetailsPage /> }
+              { path: 'events/:id', element: <EventDetailsPage /> }
             ]
           }
         ]

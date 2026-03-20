@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 
 interface SearchFilterBarProps {
     onSearch: (query: string) => void;
@@ -26,8 +26,6 @@ export const PRICE_RANGES = [
     { label: "₱1,000 - ₱5,000", value: "1000_5000" },
     { label: "Above ₱5,000", value: "above_5000" },
 ];
-
-import { useDebounceValue } from 'usehooks-ts';
 
 export function SearchFilterBar({ onSearch, onFilterChange, filters }: SearchFilterBarProps) {
     const [showFilters, setShowFilters] = React.useState(false);

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Plus, Search, MoreVertical, Edit2, Copy, Trash2,
-  Users, Calendar, MapPin, Loader2, ExternalLink,
-  CheckCircle, Clock, AlertCircle, ChevronLeft, ChevronRight
+  Plus, Search, Edit2, Copy, Trash2,
+  Users, Calendar, MapPin, Loader2,
+  Clock, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -35,14 +35,7 @@ const HostEventsPage = () => {
     setPage(1);
   }, [searchQuery]);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchEvents();
-    }, 300); // Debounce search
-    return () => clearTimeout(timer);
-  }, [page, searchQuery]);
-
-  async function fetchEvents() {
+  const fetchEvents = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -70,13 +63,19 @@ const HostEventsPage = () => {
       if (error) throw error;
       setEvents(data || []);
       setTotalCount(count || 0);
-    } catch (error) {
-      console.error('Error fetching events:', error);
+    } catch (_error) {
       toast.error('Failed to load events');
     } finally {
       setLoading(false);
     }
-  }
+  }, [page, searchQuery]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchEvents();
+    }, 300); // Debounce search
+    return () => clearTimeout(timer);
+  }, [page, searchQuery, fetchEvents]);
 
   const handleDuplicate = async (event: Partial<PopUpEvent>) => {
     if (!event.id) return;
@@ -93,7 +92,7 @@ const HostEventsPage = () => {
       return;
     }
 
-    const { id, spots_filled, created_at, ...eventData } = fullEvent;
+    const { id: _id, spots_filled: _spots_filled, created_at: _created_at, ...eventData } = fullEvent;
     const { error } = await supabase.from('events').insert([{
       ...eventData,
       title: `${eventData.title} (Copy)`,
@@ -170,12 +169,12 @@ const HostEventsPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Total Events</p>
-          <p className="text-2xl font-bold text-slate-900">{events.length}</p>
+          <p className="text-2xl font-bold text-slate-900">{totalCount}</p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <p className="text-sm font-medium text-slate-500 uppercase tracking-wider">Active Spots</p>
           <p className="text-2xl font-bold text-green-600">
-            {events.reduce((acc, e) => acc + (e.spots_available - e.spots_filled), 0)}
+            {events.reduce((acc, e) => acc + ((e.spots_available || 0) - (e.spots_filled || 0)), 0)}
           </p>
         </div>
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -221,7 +220,7 @@ const HostEventsPage = () => {
                     <div className="flex items-center gap-4">
                       <div className="h-12 w-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
                         {event.images?.[0] ? (
-                          <img src={event.images![0]} className="h-full w-full object-cover" loading="lazy" />
+                          <img src={event.images![0]} className="h-full w-full object-cover" loading="lazy" alt={event.title || "Event"} />
                         ) : (
                           <div className="h-full w-full flex items-center justify-center text-slate-400">
                             <Calendar size={20} />
@@ -235,7 +234,7 @@ const HostEventsPage = () => {
                             <Clock size={12} /> {format(new Date(event.start_date), 'MMM dd, yyyy')}
                           </span>
                           <span className="flex items-center gap-1">
-                            <MapPin size={12} /> {event.location_address.split(',')[0]}
+                            <MapPin size={12} /> {event.location_address?.split(',')[0] || 'No location'}
                           </span>
                         </div>
                       </div>

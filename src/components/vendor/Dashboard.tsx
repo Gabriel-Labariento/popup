@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { Link } from 'react-router-dom';
 import {
-  Calendar, MapPin, Tag, PhilippinePeso,
-  Users, Loader2, ArrowRight, Info
+  Calendar, MapPin, PhilippinePeso,
+  Users, Loader2, ArrowRight
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { SearchFilterBar, FilterState } from './SearchFilterBar';
@@ -20,11 +20,7 @@ export function VendorDashboard() {
   });
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    fetchPublishedEvents();
-  }, [filters, searchQuery]);
-
-  async function fetchPublishedEvents() {
+  const fetchPublishedEvents = useCallback(async () => {
     try {
       setLoading(true);
       let query = supabase
@@ -66,12 +62,15 @@ export function VendorDashboard() {
       if (error) throw error;
       setEvents(data || []);
     } catch (error: any) {
-      console.error('Error fetching events:', error);
       toast.error(error.message || "Failed to load events. Please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  }, [filters, searchQuery]);
+
+  useEffect(() => {
+    fetchPublishedEvents();
+  }, [filters, searchQuery, fetchPublishedEvents]);
 
   if (loading) {
     return (

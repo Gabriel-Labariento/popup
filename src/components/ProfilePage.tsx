@@ -43,10 +43,6 @@ const ProfilePage = () => {
       setRole(userData?.role);
 
       const table = userData?.role === 'HOST' ? 'hosts' : 'vendors';
-      const urlColumn = 'avatar_url'; // simplified, both have avatar_url or logo_url. Let's check schema.
-      // Hosts: avatar_url, Vendors: logo_url. 
-      // Actually, let's just dynamic check.
-
       const { data: profileData } = await supabase
         .from(table)
         .select('*')
@@ -75,8 +71,8 @@ const ProfilePage = () => {
           });
         }
       }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
+    } catch (_error) {
+      // Error fetching profile
     } finally {
       setLoading(false);
     }
@@ -156,7 +152,6 @@ const ProfilePage = () => {
       .select();
 
     if (error) {
-      console.error("Profile update error:", error);
       toast.error(error.message);
     } else {
       toast.success('Profile updated!');

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import { WelcomeStep } from "./welcome-step";
 import { RoleSelectionStep } from "./role-selection-step";
 import { BenefitsStep } from "./benefits-page";
@@ -6,12 +7,32 @@ import { AccountCreationStep } from "./account-creation";
 import { Footer } from "../ui/footer";
 import { AnimatePresence, motion } from "framer-motion";
 import type { UserRole } from "@/types";
+import { UserAuth } from "@/context/AuthContext";
+import { Loader2 } from "lucide-react";
 
 export function OnboardingPage() {
     //  const ONBOARDING_STEPS = ["WELCOME", 'ROLE-SELECT', 'BENEFITS', 'CREATE-ACCOUNT']
+    const { session, loading } = UserAuth();
 
     const [currentStep, setCurrentStep] = useState(0)
     const [selectedRole, setSelectedRole] = useState<UserRole | null>(null)
+
+    // Redirect authenticated users to their dashboard or role selection
+    if (loading) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <Loader2 className="animate-spin text-rose-600" size={48} />
+            </div>
+        );
+    }
+
+    if (session) {
+        const role = session.user.user_metadata.role as UserRole | undefined;
+        if (role) {
+            return <Navigate to={role === "HOST" ? "/host/dashboard" : "/vendor/dashboard"} replace />;
+        }
+        return <Navigate to="/select-role" replace />;
+    }
 
     const handleNext = () => {
         setCurrentStep((prev) => Math.min(prev + 1, 3))

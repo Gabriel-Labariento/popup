@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Calendar, MapPin, Users, Info,
-  Image as ImageIcon, Loader2, Plus, Trash2,
+  Image as ImageIcon, Loader2,
   PhilippinePeso
 } from 'lucide-react';
 import type { PopUpEvent } from '@/types';
@@ -44,14 +44,14 @@ const CreateEventPage = () => {
     status: 'DRAFT'
   });
 
-  useEffect(() => {
-    if (id) fetchEvent();
-  }, [id]);
-
-  async function fetchEvent() {
+  const fetchEvent = useCallback(async () => {
     const { data } = await supabase.from('events').select('*').eq('id', id).single();
     if (data) setFormData(data);
-  }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) fetchEvent();
+  }, [id, fetchEvent]);
 
   const toggleAmenity = (amenity: string) => {
     const current = formData.amenities || [];
@@ -74,16 +74,18 @@ const CreateEventPage = () => {
     }));
   };
 
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images && prev.images.filter((_, i) => i !== index)
-    }));
-  };
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.start_date && formData.end_date && new Date(formData.end_date) <= new Date(formData.start_date)) {
+      toast.error("End date must be after start date");
+      return;
+    }
+    if (formData.application_deadline && formData.start_date && new Date(formData.application_deadline) >= new Date(formData.start_date)) {
+      toast.error("Application deadline must be before the event start date");
+      return;
+    }
+
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -93,8 +95,12 @@ const CreateEventPage = () => {
       ? await supabase.from('events').update(payload).eq('id', id)
       : await supabase.from('events').insert([payload]);
 
-    if (!error) navigate('/host/dashboard');
-    else toast.error(error.message);
+    if (!error) {
+      toast.success(id ? "Event updated successfully!" : "Event created successfully!");
+      navigate('/host/dashboard');
+    } else {
+      toast.error(error.message);
+    }
     setLoading(false);
   };
 
@@ -109,7 +115,7 @@ const CreateEventPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto py-6 sm:py-10 px-4">
-      <form onSubmit={handleSubmit} className="space-y-6 sm:y-8">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
@@ -118,7 +124,7 @@ const CreateEventPage = () => {
           <div className="flex w-full sm:w-auto gap-3">
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as PopUpEvent['status'] })}
               className="flex-1 sm:flex-none rounded-lg border-slate-300 text-sm font-medium"
             >
               <option value="DRAFT">Draft</option>

@@ -12,7 +12,6 @@ export default function VendorLayout() {
     return (
         <div className="app-container min-h-screen flex flex-col">
             <Nav links={vendorLinks} />
-            {/* TODO: Add Vendor Sidebar here in the future */}
             <main className="flex-1">
                 <Outlet />
             </main>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client/supabase';
 import { ChatInterface } from '../chat/ChatInterface';
@@ -17,11 +17,7 @@ export default function VendorChatPage() {
         eventTitle: string;
     } | null>(null);
 
-    useEffect(() => {
-        if (applicationId) fetchDetails();
-    }, [applicationId]);
-
-    async function fetchDetails() {
+    const fetchDetails = useCallback(async () => {
         try {
             setLoading(true);
 
@@ -43,7 +39,6 @@ export default function VendorChatPage() {
 
             // Security: Ensure the vendor can only access their own chats
             if (data.vendor_id !== session?.user.id) {
-                console.error("Unauthorized access to chat");
                 navigate('/vendor/applications');
                 return;
             }
@@ -73,13 +68,16 @@ export default function VendorChatPage() {
                 hostImage: (hostData as any)?.avatar_url || null,
                 eventTitle: eventData?.title || 'Event'
             });
-        } catch (error) {
-            console.error('Error fetching chat details:', error);
+        } catch (_error) {
             navigate('/vendor/applications');
         } finally {
             setLoading(false);
         }
-    }
+    }, [applicationId]);
+
+    useEffect(() => {
+        if (applicationId) fetchDetails();
+    }, [applicationId, fetchDetails]);
 
     if (loading) {
         return (

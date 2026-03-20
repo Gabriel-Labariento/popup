@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client/supabase';
 import {
   Calendar, MapPin, Users, PhilippinePeso,
-  Info, Box, CheckCircle2, ArrowLeft,
-  Loader2, Building2, Clock, Globe, ShieldCheck
+  Box, CheckCircle2, ArrowLeft,
+  Loader2, Building2, Clock, ShieldCheck
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { UserAuth } from '@/context/AuthContext';
@@ -22,11 +22,7 @@ export default function EventDetailsPage() {
   const [hasApplied, setHasApplied] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
 
-  useEffect(() => {
-    fetchEventDetails();
-  }, [eventId, session]);
-
-  async function fetchEventDetails() {
+  const fetchEventDetails = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -60,17 +56,20 @@ export default function EventDetailsPage() {
 
         setHasApplied(count !== null && count > 0);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (_err) {
       navigate('/vendor/dashboard');
     } finally {
       setLoading(false);
     }
-  }
+  }, [eventId, session]);
+
+  useEffect(() => {
+    fetchEventDetails();
+  }, [eventId, session, fetchEventDetails]);
 
   if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-rose-600" size={48} /></div>;
 
-  const isDeadlinePassed = new Date(event.application_deadline) < new Date();
+  const isDeadlinePassed = event.application_deadline && new Date(event.application_deadline) < new Date();
   const isFull = event.spots_filled >= event.spots_available;
 
   return (
@@ -102,7 +101,7 @@ export default function EventDetailsPage() {
                     onClick={() => setActiveImage(i)}
                     className={`h-20 w-32 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 ${activeImage === i ? 'border-rose-500 scale-95' : 'border-transparent'}`}
                   >
-                    <img src={img} className="w-full h-full object-cover" />
+                    <img src={img} className="w-full h-full object-cover" alt="Event photo" />
                   </button>
                 ))}
               </div>
@@ -141,7 +140,7 @@ export default function EventDetailsPage() {
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Deadline</p>
                 <p className="text-lg font-bold text-slate-900 flex items-center gap-1 text-sm sm:text-lg">
-                  <Clock size={18} className="text-amber-500" /> {format(new Date(event.application_deadline), 'MMM dd')}
+                  <Clock size={18} className="text-amber-500" /> {event.application_deadline ? format(new Date(event.application_deadline), 'MMM dd') : 'N/A'}
                 </p>
               </div>
             </div>
@@ -223,7 +222,7 @@ export default function EventDetailsPage() {
               </div>
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-full bg-slate-100 overflow-hidden border">
-                  {event.host?.avatar_url ? <img src={event.host.avatar_url} className="w-full h-full object-cover" /> : <Building2 size={24} className="m-auto text-slate-300 h-full w-full p-2" />}
+                  {event.host?.avatar_url ? <img src={event.host.avatar_url} className="w-full h-full object-cover" alt="Host profile" /> : <Building2 size={24} className="m-auto text-slate-300 h-full w-full p-2" />}
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900">{event.host?.organization_name}</h4>

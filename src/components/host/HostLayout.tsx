@@ -11,7 +11,6 @@ export default function HostLayout() {
     return (
         <div className="app-container min-h-screen flex flex-col">
             <Nav links={hostLinks} />
-            {/* TODO: Add Host Sidebar here in the future */}
             <main className="flex-1">
                 <Outlet />
             </main>

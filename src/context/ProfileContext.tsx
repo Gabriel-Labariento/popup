@@ -28,6 +28,12 @@ export const ProfileContextProvider = ({ children }: { children: ReactNode }) =>
             setLoading(true);
             const role = session.user.user_metadata.role as UserRole;
 
+            if (!role) {
+                setProfile(null);
+                setLoading(false);
+                return;
+            }
+
             const table = role === 'HOST' ? 'hosts' : 'vendors';
 
             const { data, error } = await supabase
@@ -37,12 +43,12 @@ export const ProfileContextProvider = ({ children }: { children: ReactNode }) =>
                 .maybeSingle();
 
             if (error) {
-                console.error("[ProfileContext] Error fetching profile:", error);
+                // Error propagated via state
             }
 
             setProfile(data);
-        } catch (error) {
-            console.error("[ProfileContext] Unexpected error fetching profile:", error);
+        } catch (_error) {
+            // Unexpected error fetching profile
         } finally {
             setLoading(false);
         }

@@ -53,7 +53,7 @@ export function UpdatePassword() {
             } else {
                 setError(result.error?.message || "Failed to update password. Please try again.")
             }
-        } catch (err) {
+        } catch (_err) {
             setError("An unexpected error occurred. Please check your connection.")
         } finally {
             setLoading(false)

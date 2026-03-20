@@ -328,7 +328,7 @@ describe('RLS Policies', () => {
             expect(received.content).toBe('Secret Message')
 
             // Outsider views
-            const { data: outside, error: outError } = await outsiderClient
+            const { data: _outside, error: outError } = await outsiderClient
                 .from('messages')
                 .select('*')
                 .eq('id', msg.id)

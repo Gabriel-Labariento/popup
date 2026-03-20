@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client/supabase';
@@ -27,11 +27,7 @@ const ApplyEventPage = () => {
     portfolio_images: [] as string[]
   });
 
-  useEffect(() => {
-    fetchEventDetails();
-  }, [eventId]);
-
-  async function fetchEventDetails() {
+  const fetchEventDetails = useCallback(async () => {
     try {
       const { data: eventData, error: eventError } = await supabase
         .from('events')
@@ -50,13 +46,16 @@ const ApplyEventPage = () => {
       if (hostError && hostError.code !== 'PGRST116') throw hostError;
 
       setEvent({ ...eventData, host: hostData });
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (_error) {
       navigate('/vendor/dashboard');
     } finally {
       setLoading(false);
     }
-  }
+  }, [eventId]);
+
+  useEffect(() => {
+    fetchEventDetails();
+  }, [eventId, fetchEventDetails]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!session?.user) return;
@@ -82,6 +81,19 @@ const ApplyEventPage = () => {
 
     setSubmitting(true);
     try {
+      // Check for duplicate application
+      const { count } = await supabase
+        .from('applications')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+        .eq('vendor_id', session.user.id);
+
+      if (count && count > 0) {
+        toast.error("You have already applied to this event");
+        navigate('/vendor/applications');
+        return;
+      }
+
       const { error } = await supabase
         .from('applications')
         .insert([{
@@ -98,7 +110,7 @@ const ApplyEventPage = () => {
       if (error) throw error;
 
       toast.success("Application submitted successfully!");
-      navigate('/vendor/dashboard'); // TODO: Or to an 'Applications' list page
+      navigate('/vendor/applications');
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -196,7 +208,7 @@ const ApplyEventPage = () => {
               <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                 {formData.portfolio_images.map((url, i) => (
                   <div key={i} className="relative aspect-square rounded-lg overflow-hidden border">
-                    <img src={url} className="w-full h-full object-cover" />
+                    <img src={url} className="w-full h-full object-cover" alt="Portfolio image" />
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, portfolio_images: formData.portfolio_images.filter((_, idx) => idx !== i) })}

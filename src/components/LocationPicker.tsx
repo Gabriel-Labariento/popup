@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import React, { useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Search, MapPin, Loader2 } from 'lucide-react';
@@ -8,7 +8,7 @@ import { Search, MapPin, Loader2 } from 'lucide-react';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
     iconUrl: markerIcon,
     shadowUrl: markerShadow,
     iconSize: [25, 41],
@@ -48,8 +48,8 @@ const LocationPicker = ({ onLocationSelect, defaultAddress }: LocationPickerProp
             const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5`);
             const data = await res.json();
             setSuggestions(data.features || []);
-        } catch (err) {
-            console.error("Search error", err);
+        } catch (_err) {
+            // Search failed
         } finally {
             setIsSearching(false);
         }

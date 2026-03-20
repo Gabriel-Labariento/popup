@@ -24,8 +24,8 @@ export function Header({ links }: HeaderProps) {
 		try {
 			await signOut();
 			navigate("/login");
-		} catch (error) {
-			console.error("Error signing out: ", error);
+		} catch (_error) {
+			// Sign out failed
 		}
 	};
 
@@ -38,7 +38,7 @@ export function Header({ links }: HeaderProps) {
 		>
 			<nav className="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
 				<Link to="/dashboard" className="hover:bg-accent flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 duration-100">
-					<img src="/icon.png" className="size-6" />
+					<img src="/icon.png" className="size-6" alt="Pop Up logo" />
 					<p className="font-mono text-lg font-bold">Pop Up</p>
 				</Link>
 				<div className="flex items-center gap-2">

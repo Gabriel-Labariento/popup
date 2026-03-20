@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { Send, Loader2, User } from 'lucide-react';
 import { format } from 'date-fns';
@@ -28,6 +29,55 @@ export function ChatInterface({ applicationId, currentUserId, otherPartyName, ot
     const [sending, setSending] = useState(false);
     const [receiverId, setReceiverId] = useState<string | null>(null); // Optimized
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Optimization: Find out who we are talking to once, instead of every message
+    const fetchReceiverId = useCallback(async () => {
+        interface ApplicationData {
+            vendor_id: string;
+            event: {
+                host_id: string;
+            };
+        }
+
+        const { data } = await supabase
+            .from('applications')
+            .select('vendor_id, event:events(host_id)')
+            .eq('id', applicationId)
+            .single();
+
+        if (data) {
+            // Cast the loose Supabase return type to our known structure
+            const appData = data as unknown as ApplicationData;
+            const hostId = appData.event?.host_id;
+
+            // Fallback logic if for some reason data is missing
+            if (!hostId) return;
+
+            const target = currentUserId === appData.vendor_id ? hostId : appData.vendor_id;
+            setReceiverId(target);
+        }
+    }, [applicationId, currentUserId]);
+
+    const fetchMessages = useCallback(async () => {
+        try {
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .eq('application_id', applicationId)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+            setMessages(data || []);
+        } catch (_error) {
+            toast.error("Failed to load messages");
+        } finally {
+            setLoading(false);
+        }
+    }, [applicationId]);
 
     useEffect(() => {
         // 1. Initial Fetch
@@ -62,60 +112,11 @@ export function ChatInterface({ applicationId, currentUserId, otherPartyName, ot
         return () => {
             supabase.removeChannel(channel);
         };
-    }, [applicationId]);
+    }, [applicationId, fetchMessages, fetchReceiverId]);
 
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
-
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    // Optimization: Find out who we are talking to once, instead of every message
-    async function fetchReceiverId() {
-        interface ApplicationData {
-            vendor_id: string;
-            event: {
-                host_id: string;
-            };
-        }
-
-        const { data } = await supabase
-            .from('applications')
-            .select('vendor_id, event:events(host_id)')
-            .eq('id', applicationId)
-            .single();
-
-        if (data) {
-            // Cast the loose Supabase return type to our known structure
-            const appData = data as unknown as ApplicationData;
-            const hostId = appData.event?.host_id;
-
-            // Fallback logic if for some reason data is missing
-            if (!hostId) return;
-
-            const target = currentUserId === appData.vendor_id ? hostId : appData.vendor_id;
-            setReceiverId(target);
-        }
-    }
-
-    async function fetchMessages() {
-        try {
-            const { data, error } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('application_id', applicationId)
-                .order('created_at', { ascending: true });
-
-            if (error) throw error;
-            setMessages(data || []);
-        } catch (error) {
-            console.error('Error fetching messages:', error);
-        } finally {
-            setLoading(false);
-        }
-    }
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -134,10 +135,10 @@ export function ChatInterface({ applicationId, currentUserId, otherPartyName, ot
 
             if (error) throw error;
             setNewMessage('');
-            // Note: We NO LONGER need fetchMessages() here. 
+            // Note: We NO LONGER need fetchMessages() here.
             // The Realtime subscription will hear our own "INSERT" and update the UI.
-        } catch (error) {
-            console.error('Error sending message:', error);
+        } catch (_error) {
+            toast.error("Failed to send message");
         } finally {
             setSending(false);
         }
@@ -168,10 +169,6 @@ export function ChatInterface({ applicationId, currentUserId, otherPartyName, ot
                 </div>
                 <div>
                     <h3 className="font-bold text-slate-800">{otherPartyName}</h3>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                        Active
-                    </p>
                 </div>
             </div>
 

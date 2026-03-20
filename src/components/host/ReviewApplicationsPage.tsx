@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client/supabase';
@@ -16,11 +16,7 @@ const ReviewApplicationsPage = () => {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchApplications();
-  }, [eventId]);
-
-  async function fetchApplications() {
+  const fetchApplications = useCallback(async () => {
     try {
       setLoading(true);
       // Fetch applications + nested vendor profile data
@@ -49,16 +45,24 @@ const ReviewApplicationsPage = () => {
 
       if (eventData) setEventTitle(eventData.title);
     } catch (error: any) {
-      console.error('Error fetching applications:', error);
       toast.error(error.message || "Failed to load applications");
     } finally {
       setLoading(false);
     }
-  }
+  }, [eventId]);
+
+  useEffect(() => {
+    fetchApplications();
+  }, [eventId, fetchApplications]);
 
   const updateStatus = async (applicationId: string, newStatus: 'ACCEPTED' | 'REJECTED' | 'PENDING') => {
     try {
       setUpdatingId(applicationId);
+
+      // Find the current application to know its previous status
+      const currentApp = applications.find(a => a.id === applicationId);
+      const previousStatus = currentApp?.status;
+
       if (newStatus === 'ACCEPTED') {
         const { data: eventData, error: eventError } = await supabase
           .from('events')
@@ -81,7 +85,31 @@ const ReviewApplicationsPage = () => {
 
       if (error) throw error;
 
+      // Update spots_filled based on status transition
+      const wasAccepted = previousStatus === 'ACCEPTED';
+      const isNowAccepted = newStatus === 'ACCEPTED';
+
+      if (wasAccepted !== isNowAccepted) {
+        const { data: currentEvent } = await supabase
+          .from('events')
+          .select('spots_filled')
+          .eq('id', eventId)
+          .single();
+
+        if (currentEvent) {
+          const newSpotsFilled = isNowAccepted
+            ? currentEvent.spots_filled + 1
+            : Math.max(0, currentEvent.spots_filled - 1);
+
+          await supabase
+            .from('events')
+            .update({ spots_filled: newSpotsFilled })
+            .eq('id', eventId);
+        }
+      }
+
       toast.success(`Application ${newStatus.toLowerCase()} successfully`);
+      await fetchApplications();
     } catch (error: any) {
       toast.error(error.message || "Failed to update application status");
     } finally {
@@ -117,7 +145,7 @@ const ReviewApplicationsPage = () => {
                 <div className="flex flex-col items-center text-center">
                   <div className="h-20 w-20 rounded-full bg-white border border-slate-200 overflow-hidden mb-4 shadow-sm">
                     {app.vendor?.logo_url ? (
-                      <img src={app.vendor.logo_url} className="h-full w-full object-cover" />
+                      <img src={app.vendor.logo_url} className="h-full w-full object-cover" alt="Vendor logo" />
                     ) : (
                       <div className="h-full w-full flex items-center justify-center text-slate-300"><User size={32} /></div>
                     )}
@@ -172,7 +200,7 @@ const ReviewApplicationsPage = () => {
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Portfolio</h4>
                   <div className="flex gap-2 overflow-x-auto pb-2">
                     {app.portfolio_images?.map((img: string, idx: number) => (
-                      <img key={idx} src={img} className="h-20 w-20 rounded-lg object-cover border border-slate-200 flex-shrink-0" />
+                      <img key={idx} src={img} className="h-20 w-20 rounded-lg object-cover border border-slate-200 flex-shrink-0" alt="Vendor portfolio" />
                     ))}
                   </div>
                 </div>

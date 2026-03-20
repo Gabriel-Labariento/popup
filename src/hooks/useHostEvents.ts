@@ -21,8 +21,7 @@ export function useHostEvents() {
                 if (error) throw error;
 
                 setHasEvents(count !== null && count > 0);
-            } catch (err) {
-                console.error("Error checking events:", err);
+            } catch (_err) {
                 setHasEvents(false);
             } finally {
                 setFetching(false);

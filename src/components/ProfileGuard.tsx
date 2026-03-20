@@ -18,13 +18,6 @@ export const ProfileGuard = () => {
 
     const isProfilePage = location.pathname.includes('/profile');
 
-    console.log("[ProfileGuard] Checking access", {
-        isComplete,
-        isLoading,
-        path: location.pathname,
-        isProfilePage
-    });
-
     useEffect(() => {
         if (!isLoading && !isComplete && !isProfilePage) {
             toast.error("Please complete your profile to continue.", {

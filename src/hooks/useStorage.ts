@@ -25,7 +25,7 @@ export const useStorage = (bucket: string) => {
             useWebWorker: true
           };
           fileToUpload = await imageCompression(file, options);
-        } catch (compressError) {
+        } catch (_compressError) {
           // Fallback to original file if compression fails
         }
 

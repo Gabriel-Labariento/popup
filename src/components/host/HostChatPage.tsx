@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/lib/supabase/client/supabase';
 import { ChatInterface } from '../chat/ChatInterface';
@@ -15,11 +15,7 @@ export default function HostChatPage() {
         eventTitle: string;
     } | null>(null);
 
-    useEffect(() => {
-        if (applicationId) fetchDetails();
-    }, [applicationId]);
-
-    async function fetchDetails() {
+    const fetchDetails = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('applications')
@@ -50,12 +46,16 @@ export default function HostChatPage() {
                 vendorImage: (typedData.vendor as any)?.logo_url || null, // Cast to any to avoid strict type issues if interface isn't fully updated
                 eventTitle: getEventTitle(typedData.event) || 'Event'
             });
-        } catch (error) {
-            console.error('Error fetching chat details:', error);
+        } catch (_error) {
+            // Failed to fetch chat details
         } finally {
             setLoading(false);
         }
-    }
+    }, [applicationId]);
+
+    useEffect(() => {
+        if (applicationId) fetchDetails();
+    }, [applicationId, fetchDetails]);
 
     if (loading) return <div className="flex h-screen items-center justify-center"><Loader2 className="animate-spin text-rose-600" /></div>;
     if (!chatDetails || !session) return <div>Chat not found</div>;

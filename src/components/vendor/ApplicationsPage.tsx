@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { Link } from 'react-router-dom';
@@ -15,13 +15,7 @@ export default function VendorApplicationsPage() {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (session?.user.id) {
-      fetchMyApplications();
-    }
-  }, [session]);
-
-  async function fetchMyApplications() {
+  const fetchMyApplications = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -44,12 +38,17 @@ export default function VendorApplicationsPage() {
       if (error) throw error;
       setApplications(data || []);
     } catch (err: any) {
-      console.error('Error fetching applications:', err);
       toast.error(`Error loading applications: ${err.message}`);
     } finally {
       setLoading(false);
     }
-  }
+  }, [session?.user.id]);
+
+  useEffect(() => {
+    if (session?.user.id) {
+      fetchMyApplications();
+    }
+  }, [session, fetchMyApplications]);
 
   const getStatusDisplay = (status: string) => {
     switch (status) {

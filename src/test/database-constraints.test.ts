@@ -1,5 +1,5 @@
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, afterAll } from 'vitest'
 import { createClient } from '@supabase/supabase-js'
 import { config } from 'dotenv'
 import { createTestUser, createAnonClient } from './setup'
@@ -16,7 +16,7 @@ if (!supabaseServiceKey) {
 const adminSupabase = createClient(supabaseUrl, supabaseServiceKey || 'placeholder')
 
 describe('Database Constraints', () => {
-    let createdUserIds: string[] = []
+    const createdUserIds: string[] = []
 
     afterAll(async () => {
         // Cleanup users created during tests
@@ -88,7 +88,7 @@ describe('Database Constraints', () => {
         // Or maybe check order is undefined.
         // If we get 23503, we should retry with a valid host profile to verify the NOT NULL constraint on title.
         if (error?.code === '23503') {
-            const host = await createHostProfile(client, user!.id)
+            const _host = await createHostProfile(client, user!.id)
             const { error: error2 } = await client
                 .from('events')
                 .insert({
@@ -118,7 +118,7 @@ describe('Database Constraints', () => {
         expect(error1).toBeNull()
         if (data1.user) createdUserIds.push(data1.user.id)
 
-        const { data: data2, error: error2 } = await supabase.auth.signUp({
+        const { data: _data2, error: _error2 } = await supabase.auth.signUp({
             email,
             password,
         })

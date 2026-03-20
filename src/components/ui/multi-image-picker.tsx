@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, Trash2, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
 
 interface MultiImagePickerProps {
   images: string[];

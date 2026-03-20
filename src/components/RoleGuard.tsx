@@ -17,8 +17,10 @@ export const RoleGuard = ({ allowedRole }: RoleGuardProps) => {
     )
   }
   if (!session) return <Navigate to="/login" replace />;
-  
+
   const userRole = session.user.user_metadata.role;
+
+  if (!userRole) return <Navigate to="/select-role" replace />;
 
   if (userRole !== allowedRole || allowedRole === undefined) {
     // Redirect to their own dashboard if they try to access the wrong role's area

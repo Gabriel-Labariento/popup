@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from "sonner";
 import { supabase } from '@/lib/supabase/client/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   Calendar, MapPin, Users, Info,
-  Image as ImageIcon, Loader2, Plus, Trash2,
-  PhilippinePeso, ArrowLeft
+  Image as ImageIcon, Loader2,
+  PhilippinePeso
 } from 'lucide-react';
 import type { PopUpEvent } from '@/types';
 import LocationPicker from '../LocationPicker';
+import { useStorage } from '@/hooks/useStorage';
+import { MultiImagePicker } from '../ui/multi-image-picker';
+import { UserAuth } from '@/context/AuthContext';
 
 import { EVENT_CATEGORIES } from '@/constants/categories';
 
@@ -17,10 +20,11 @@ const AMENITY_OPTIONS = ['WiFi', 'Electricity', 'Tables Provided', 'Chairs Provi
 const EditEventPage = () => {
   const { id } = useParams(); // Get the ID from the URL
   const navigate = useNavigate();
+  const { uploadImages, uploading } = useStorage('event-images');
+  const { session } = UserAuth();
 
   const [loading, setLoading] = useState(!!id); // Loading if we have an ID to fetch
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState<Partial<PopUpEvent>>({
     title: '',
@@ -41,13 +45,7 @@ const EditEventPage = () => {
     status: 'DRAFT'
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchEvent();
-    }
-  }, [id]);
-
-  async function fetchEvent() {
+  const fetchEvent = useCallback(async () => {
     try {
       setLoading(true);
       const { data: { user } } = await supabase.auth.getUser();
@@ -82,44 +80,43 @@ const EditEventPage = () => {
         start_date: data.start_date ? formatDateForInput(data.start_date) : '',
         end_date: data.end_date ? formatDateForInput(data.end_date) : ''
       });
-    } catch (error) {
-      console.error('Error fetching event:', error);
+    } catch (_error) {
       toast.error("Could not load event data.");
       navigate('/host/dashboard');
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    try {
-      setUploading(true);
-      const files = Array.from(e.target.files || []);
-      if (files.length + (formData.images?.length || 0) > 5) {
-        toast.error("Maximum 5 images allowed");
-        return;
-      }
-
-      const uploadPromises = files.map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        const filePath = `events/${Math.random()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('event-images').upload(filePath, file);
-        if (uploadError) throw uploadError;
-        const { data } = supabase.storage.from('event-images').getPublicUrl(filePath);
-        return data.publicUrl;
-      });
-
-      const urls = await Promise.all(uploadPromises);
-      setFormData({ ...formData, images: [...(formData.images || []), ...urls] });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setUploading(false);
+  useEffect(() => {
+    if (id) {
+      fetchEvent();
     }
+  }, [id, fetchEvent]);
+
+  const handleFileChange = async (files: FileList) => {
+    if (!session?.user.id) return;
+
+    const urls = await uploadImages(Array.from(files), session.user.id);
+
+    setFormData(prev => ({
+      ...prev,
+      images: [...(prev.images || []), ...urls]
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.start_date && formData.end_date && new Date(formData.end_date) <= new Date(formData.start_date)) {
+      toast.error("End date must be after start date");
+      return;
+    }
+    if (formData.application_deadline && formData.start_date && new Date(formData.application_deadline) >= new Date(formData.start_date)) {
+      toast.error("Application deadline must be before the event start date");
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -181,7 +178,7 @@ const EditEventPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto py-6 sm:py-10 px-4">
-      <form onSubmit={handleSubmit} className="space-y-6 sm:y-8">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
@@ -190,7 +187,7 @@ const EditEventPage = () => {
           <div className="flex w-full sm:w-auto gap-3">
             <select
               value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as PopUpEvent['status'] })}
               className="flex-1 sm:flex-none rounded-lg border-slate-300 text-sm font-medium"
             >
               <option value="DRAFT">Draft</option>
@@ -199,10 +196,10 @@ const EditEventPage = () => {
             </select>
             <button
               type="submit"
-              disabled={loading}
+              disabled={saving}
               className="flex-1 sm:flex-none bg-rose-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-rose-700 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
             >
-              {loading && <Loader2 className="animate-spin" size={18} />}
+              {saving && <Loader2 className="animate-spin" size={18} />}
               {id ? 'Update' : 'Publish'}
             </button>
           </div>
@@ -226,7 +223,7 @@ const EditEventPage = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700">Category</label>
-                  <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none">
+                  <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value as PopUpEvent['category'] })} className="w-full p-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none">
                     {EVENT_CATEGORIES.map(c => <option key={c} value={c}>{c.charAt(0) + c.slice(1).toLowerCase()}</option>)}
                   </select>
                 </div>
@@ -328,27 +325,17 @@ const EditEventPage = () => {
               <h2 className="text-lg font-bold flex items-center gap-2">
                 <ImageIcon size={20} className="text-rose-500" /> Images (Max 5)
               </h2>
-              <div className="grid grid-cols-3 gap-2">
-                {formData.images?.map((url, i) => (
-                  <div key={i} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200">
-                    <img src={url} className="w-full h-full object-cover" alt={`Event ${i}`} />
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, images: formData.images?.filter((_, idx) => idx !== i) })}
-                      className="absolute top-1 right-1 bg-black/60 p-1 rounded-full text-white hover:bg-black transition-colors"
-                    >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                ))}
-                {(formData.images?.length || 0) < 5 && (
-                  <label className="aspect-square border-2 border-dashed border-slate-200 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 hover:border-rose-300 transition-all group">
-                    <Plus className="text-slate-400 group-hover:text-rose-500" />
-                    <span className="text-[10px] text-slate-400 font-bold uppercase mt-1 group-hover:text-rose-500">Add</span>
-                    <input type="file" hidden accept="image/*" multiple onChange={handleImageUpload} disabled={uploading} />
-                  </label>
-                )}
-              </div>
+              <MultiImagePicker
+                images={formData.images || []}
+                onUpload={handleFileChange}
+                onRemove={(index) => {
+                  setFormData({
+                    ...formData,
+                    images: formData.images?.filter((_, i) => i !== index)
+                  });
+                }}
+                uploading={uploading}
+              />
               {uploading && <p className="text-xs text-rose-600 animate-pulse font-medium">Uploading images...</p>}
             </div>
           </div>

@@ -13,6 +13,7 @@ type AuthContextType = {
     loading: boolean,
     signUpNewUser: (credentials: UserCredentials, selectedRole: UserRole) => Promise<{ success: boolean, error?: AuthError, data?: any }>,
     signInUser: (credentials: UserCredentials) => Promise<{ success: boolean, error?: AuthError, data?: any }>,
+    signInWithGoogle: () => Promise<{ success: boolean, error?: AuthError }>,
     signOut: () => Promise<void>,
     resetPassword: (email: string) => Promise<{ success: boolean, error?: AuthError }>,
     updatePassword: (password: string) => Promise<{ success: boolean, error?: AuthError }>
@@ -51,7 +52,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             }
         })
         if (error) {
-            console.error("Error signing up: ", error)
             return { success: false, error }
         }
         return { success: true, data }
@@ -65,13 +65,11 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
                 password: password
             })
             if (error) {
-                console.error("Sign in error: ", error)
                 return { success: false, error }
             }
 
             return { success: true, data: data }
         } catch (error) {
-            console.error("Error signing in: ", error)
             return { success: false, error: error as AuthError }
         }
     }
@@ -80,8 +78,22 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const signOut = async () => {
         const { error } = await supabase.auth.signOut();
         if (error) {
-            console.error("Sign out error: ", error)
+            // Error already surfaced via Supabase
         }
+    }
+
+    // Sign in with Google
+    const signInWithGoogle = async (): Promise<{ success: boolean, error?: AuthError }> => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: `${window.location.origin}/auth/callback`,
+            }
+        })
+        if (error) {
+            return { success: false, error }
+        }
+        return { success: true }
     }
 
     // Reset Password Request
@@ -90,7 +102,6 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
             redirectTo: `${window.location.origin}/update-password`,
         })
         if (error) {
-            console.error("Reset password error: ", error)
             return { success: false, error }
         }
         return { success: true }
@@ -100,14 +111,13 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const updatePassword = async (password: string): Promise<{ success: boolean, error?: AuthError }> => {
         const { error } = await supabase.auth.updateUser({ password })
         if (error) {
-            console.error("Update password error: ", error)
             return { success: false, error }
         }
         return { success: true }
     }
 
     return (
-        <AuthContext.Provider value={{ session, loading, signUpNewUser, signInUser, signOut, resetPassword, updatePassword }}>
+        <AuthContext.Provider value={{ session, loading, signUpNewUser, signInUser, signInWithGoogle, signOut, resetPassword, updatePassword }}>
             {children}
         </AuthContext.Provider>
     )

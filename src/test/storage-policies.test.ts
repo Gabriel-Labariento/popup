@@ -36,7 +36,7 @@ describe('Storage Policies', () => {
 
         // 5MB JPEG
         const largeSize = 5 * 1024 * 1024
-        const { data, error } = await uploadFile(client, user.id, `large_${Date.now()}.jpg`, largeSize, 'image/jpeg')
+        const { data: _data, error } = await uploadFile(client, user.id, `large_${Date.now()}.jpg`, largeSize, 'image/jpeg')
 
         expect(error).toBeDefined()
         // Error message depends on how it's enforced (RLS or Bucket Config)
@@ -47,7 +47,7 @@ describe('Storage Policies', () => {
         const { user, client } = await createTestUser()
 
         // 1KB Text file
-        const { data, error } = await uploadFile(client, user.id, `bad_${Date.now()}.txt`, 1024, 'text/plain')
+        const { data: _data, error } = await uploadFile(client, user.id, `bad_${Date.now()}.txt`, 1024, 'text/plain')
 
         expect(error).toBeDefined()
     })

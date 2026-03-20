@@ -6,8 +6,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { UserAuth } from '@/context/AuthContext'
 
-import { Footer } from './ui/footer'
-
 export function ForgotPassword() {
     const [email, setEmail] = useState('')
     const [loading, setLoading] = useState(false)
@@ -30,7 +28,7 @@ export function ForgotPassword() {
             } else {
                 setError(result.error?.message || "Failed to send reset email. Please try again.")
             }
-        } catch (err) {
+        } catch (_err) {
             setError("An unexpected error occurred. Please check your connection.")
         } finally {
             setLoading(false)

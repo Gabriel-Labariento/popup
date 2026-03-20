@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flag, Mail } from 'lucide-react';
+import { Flag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Tooltip,

@@ -20,8 +20,6 @@ export const GlobalError = () => {
         errorMessage = 'An unexpected error occurred.';
     }
 
-    console.error(error);
-
     return (
         <div className="flex min-h-screen flex-col bg-background">
             <div className="flex-1 flex flex-col items-center justify-center px-4 text-center">

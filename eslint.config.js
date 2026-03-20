@@ -24,6 +24,12 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        destructuredArrayIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
     },
   },
 )
